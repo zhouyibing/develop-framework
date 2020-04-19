@@ -1,9 +1,15 @@
 开发框架基本核心功能
 
 1.单表操作基础封装(CRUD)
+  
   1.1 不需要写任何业务逻辑，接口逻辑
+  
   1.2 仅需定义好数据库实体model,设置好返回结果
+  
   1.3 创建数据库表相关的service和controller里，具体操作，参照base-service项目里的base-config模块
+
 2.不需要的接口可配置。参考base-service项目里的base-test模块里的配置，有注释。
+
 3.swagger文档的动态生成，动态移除屏蔽的接口
+
 4.常用功能的集成  
