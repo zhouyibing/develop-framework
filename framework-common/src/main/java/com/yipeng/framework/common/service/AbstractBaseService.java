@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.db.sql.Direction;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.yipeng.framework.common.constants.BooleanEnum;
 import com.yipeng.framework.common.constants.Constants;
 import com.yipeng.framework.common.service.converter.ModelResultConverter;
 import com.yipeng.framework.common.dao.BaseDao;
@@ -13,7 +14,6 @@ import com.yipeng.framework.common.model.BaseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import tk.mybatis.mapper.entity.Example;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
@@ -26,17 +26,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author: yibingzhou
  */
 @Slf4j
-public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> implements IBaseService<R,P>{
+public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> implements IBaseService<P>{
     protected T dao;
     protected ModelResultConverter modelResultConverter;
-    protected Class<R> resultClass;
     protected Class<M> modelClass;
 
 
-    public AbstractBaseService(T dao, ModelResultConverter modelResultConverter, Class<R> resultClass, Class<M> modelClass) {
+    public AbstractBaseService(T dao, ModelResultConverter modelResultConverter, Class<M> modelClass) {
         this.dao = dao;
         this.modelResultConverter = modelResultConverter;
-        this.resultClass = resultClass;
         this.modelClass = modelClass;
     }
 
@@ -45,16 +43,16 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         return (D) dao;
     }
 
-    public R queryById(Long id) {
+    public <N extends Number, R> R queryById(N id, Class<R> resultClass) {
         BaseModel result = dao.queryById(id);
         if(null == result) return null;
-        return convert((M) result);
+        return convert((M) result, resultClass);
     }
 
-    public List<R> queryByIds(List<Long> ids) {
+    public <N extends Number,R> List<R> queryByIds(List<N> ids, Class<R> resultClass) {
         Example example = new Example(modelClass);
         example.createCriteria().andIn("id", ids);
-        return queryByExample(example);
+        return queryByExample(example, resultClass);
     }
 
     /**
@@ -62,14 +60,14 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
      * @param id
      * @return
      */
-    public boolean logicDeleteById(Long id) {
+    public <N extends Number> boolean logicDeleteById(N id) {
         M model = newModelInstance();
         model.setId(id);
         return Constants.DEFAULT_AFFECT_ROWS == dao.logicDeleteByPk(model);
     }
 
     @Override
-    public Integer logicDeleteById(List<Long> ids) {
+    public <N extends Number> Integer logicDeleteByIds(List<N> ids) {
         Example example = new Example(modelClass);
         example.createCriteria().andIn("id", ids);
         return dao.logicDeleteByExample(newModelInstance(), example);
@@ -80,12 +78,12 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
      * @param id
      * @return
      */
-    public boolean deleteById(Long id) {
+    public <N extends Number> boolean deleteById(N id) {
         return Constants.DEFAULT_AFFECT_ROWS == dao.deleteByPk(id);
     }
 
     @Override
-    public Integer deleteById(List<Long> ids) {
+    public <N extends Number> Integer deleteByIds(List<N> ids) {
         Example example = new Example(modelClass);
         example.createCriteria().andIn("id", ids);
         return dao.deleteByExample(example);
@@ -95,6 +93,9 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
     public boolean create(P param) {
         M model = toModel(param);
         Boolean selective = model.getSelective();
+        //除掉主键字段
+        model.setId(null);
+        model.setLogicDelete(BooleanEnum.FALSE.getCode());
         if(selective != null && selective) {
             return Constants.DEFAULT_AFFECT_ROWS == dao.insertSelective(model);
         } else {
@@ -108,6 +109,8 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         List<M> models = Lists.newArrayList();
         list.forEach(item -> {
             M model = toModel(item);
+            model.setId(null);
+            model.setLogicDelete(BooleanEnum.FALSE.getCode());
             models.add(model);
         });
         return dao.insertList(list);
@@ -187,6 +190,7 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         if(example == null) {
             return Constants.NO_AFFECT_ROWS;
         }
+        example.excludeProperties("id");
         M model = toModel(update);
         Boolean selective = model.getSelective();
         if(selective != null && selective){
@@ -197,7 +201,7 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
     }
 
     @Override
-    public boolean update(Long id, P update) {
+    public boolean update(Number id, P update) {
         M model = toModel(update);
         Boolean selective = model.getSelective();
         model.setId(id);
@@ -209,15 +213,15 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
     }
 
     @Override
-    public List<R> queryAllMatch(P param) {
+    public <R> List<R> queryAllMatch(P param, Class<R> resultClass) {
         Example example = buildAllMatch(param);
-        return queryByExample(example);
+        return queryByExample(example,resultClass);
     }
 
     @Override
-    public List<R> queryAnyMatch(P param) {
+    public <R> List<R> queryAnyMatch(P param, Class<R> resultClass) {
         Example example = buildAnyMatch(param);
-        return queryByExample(example);
+        return queryByExample(example,resultClass);
     }
 
     public Example buildAllMatch(P param) {
@@ -255,18 +259,18 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
     }
 
     @Override
-    public PageInfo<R> pageAllMatch(P param, Integer pageNum, Integer pageSize) {
+    public <R> PageInfo<R> pageAllMatch(P param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
         Example example = buildAllMatch(param);
-        return pageByExample(example, pageNum, pageSize);
+        return pageByExample(example, pageNum, pageSize,resultClass);
     }
 
     @Override
-    public PageInfo<R> pageAllMatch(P param, String orderField, Integer pageNum, Integer pageSize) {
-        return pageAllMatch(param, orderField, Direction.ASC, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(P param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pageAllMatch(param, orderField, Direction.ASC, pageNum, pageSize,resultClass);
     }
 
     @Override
-    public PageInfo<R> pageAllMatch(P param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
+    public <R> PageInfo<R> pageAllMatch(P param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
         Example example = buildAllMatch(param);
         if(null == example) {
             return null;
@@ -278,22 +282,22 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         } else if(direction == Direction.ASC) {
             orderBy.asc();
         }
-        return pageByExample(example, pageNum, pageSize);
+        return pageByExample(example, pageNum, pageSize,resultClass);
     }
 
     @Override
-    public PageInfo<R> pageAnyMatch(P param, Integer pageNum, Integer pageSize) {
+    public <R> PageInfo<R> pageAnyMatch(P param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
         Example example = buildAnyMatch(param);
-        return pageByExample(example, pageNum, pageSize);
+        return pageByExample(example, pageNum, pageSize, resultClass);
     }
 
     @Override
-    public PageInfo<R> pageAnyMatch(P param, String orderField, Integer pageNum, Integer pageSize) {
-        return pageAnyMatch(param, orderField, Direction.ASC, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(P param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pageAnyMatch(param, orderField, Direction.ASC, pageNum, pageSize, resultClass);
     }
 
     @Override
-    public PageInfo<R> pageAnyMatch(P param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
+    public <R> PageInfo<R> pageAnyMatch(P param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
         Example example = buildAnyMatch(param);
         if(null == example) {
             return null;
@@ -305,20 +309,20 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         } else if(direction == Direction.ASC) {
             orderBy.asc();
         }
-        return pageByExample(example, pageNum, pageSize);
+        return pageByExample(example, pageNum, pageSize, resultClass);
     }
 
-    private <K> M toModel(K param) {
+    protected  <K> M toModel(K param) {
         if(param instanceof BaseModel){
             return (M)param;
         }
         M model = newModelInstance();
         if(param instanceof Object[]) {
-            modelResultConverter.toDbModel((Object[])param, model);
+            modelResultConverter.convert((Object[])param, model);
         } else if(param instanceof Map) {
-            modelResultConverter.toDbModel((Map)param, model);
+            modelResultConverter.convert((Map)param, model);
         } else {
-            modelResultConverter.toDbModel(param, model);
+            modelResultConverter.convert(param, model);
         }
         return model;
     }
@@ -371,9 +375,9 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         return example;
     }
 
-    public List<R> queryByExample(Example example) {
+    public <R> List<R> queryByExample(Example example, Class<R> resultClass) {
         if(example == null) return Collections.emptyList();
-        return convert(dao.queryByExample(example));
+        return convert(dao.queryByExample(example), resultClass);
     }
 
     public Integer deleteByExample(Example example) {
@@ -404,10 +408,10 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         return dao.exitWithExample(example);
     }
 
-    public PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize) {
+    public <R> PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize, Class<R> resultClass) {
         if(example == null) return null;
         PageInfo<M> result = dao.queryPageByExample(example, pageNum, pageSize);
-        List<R> convertResult = convert(result.getList());
+        List<R> convertResult = convert(result.getList(), resultClass);
         PageInfo<R> ret = new PageInfo<>();
         result.setList(null);
         BeanUtils.copyProperties(result, ret);
@@ -450,11 +454,11 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
         return null;
     }
 
-    private List<R> convert(List<M> list) {
+    private <R> List<R> convert(List<M> list, Class<R> resultClass) {
         if(CollectionUtil.isEmpty(list)) return Collections.emptyList();
         List<R> ret = Lists.newArrayList();
         for(M m : list) {
-            R r = convert(m);
+            R r = convert(m, resultClass);
             ret.add(r);
         }
         return ret;
@@ -465,34 +469,36 @@ public class AbstractBaseService <R,M extends BaseModel,P,T extends BaseDao> imp
      * @param baseModel
      * @return
      */
-    protected R convert(M baseModel) {
+    protected <R> R convert(M baseModel, Class<R> resultClass) {
         if(!needConvert() && resultClass != modelClass){
             throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("result class must the same as model class if not need convert"));
         }
         if(!needConvert()) {
             return (R)baseModel;
         } else {
-            return toResult(baseModel);
+            return toResult(baseModel, resultClass);
         }
     }
 
-    private R toResult(M baseModel) {
-        R result = newResultInstance();
-        modelResultConverter.toResult(baseModel, result, extraIgnoreFields(), notIgnoreFields());
-        return result;
+    protected  <R> R toResult(M baseModel,Class<R> resultClass) {
+        try {
+            R result = null;
+            if(Map.class.isAssignableFrom(resultClass)) {
+                resultClass.newInstance();
+                modelResultConverter.convert(baseModel, (Map)result, extraIgnoreFields(), notIgnoreFields());
+            } else {
+                result = resultClass.newInstance();
+                modelResultConverter.convert(baseModel, result, extraIgnoreFields(), notIgnoreFields());
+            }
+            return result;
+        } catch (Exception e) {
+            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+        }
     }
 
     private M newModelInstance(){
         try {
             return modelClass.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private R newResultInstance(){
-        try {
-            return resultClass.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

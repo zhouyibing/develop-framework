@@ -1,5 +1,7 @@
 package com.yipeng.framework.common.param;
 
+import cn.hutool.db.sql.Direction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
 import lombok.Data;
@@ -7,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.validation.Valid;
 import java.io.Serializable;
@@ -72,7 +75,8 @@ public class PageParam<T> implements Serializable {
     /**
      * 排序类型
      */
-    public String getOrderType() {
-        return desc ? "desc" : "asc";
+    @JsonIgnore
+    public Direction getOrderType() {
+        return desc ? Direction.DESC : Direction.ASC;
     }
 }

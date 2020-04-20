@@ -13,16 +13,16 @@ import java.util.List;
  * 方法返回规则：如果确定仅影响一条记录，方法返回boolean,否则返回影响行数
  * 查询是否存在返回boolean
  */
-public interface IBaseService<R, T> {
+public interface IBaseService<T> {
 
     <D extends BaseDao> D getDao();
 
-    R queryById(Long id);
-    List<R> queryByIds(List<Long> ids);
-    boolean logicDeleteById(Long id);
-    Integer logicDeleteById(List<Long> ids);
-    boolean deleteById(Long id);
-    Integer deleteById(List<Long> ids);
+    <N extends Number,R> R queryById(N id,Class<R> resultClass);
+    <N extends Number,R> List<R> queryByIds(List<N> ids,Class<R> resultClass);
+    <N extends Number> boolean logicDeleteById(N id);
+    <N extends Number> Integer logicDeleteByIds(List<N> ids);
+    <N extends Number> boolean deleteById(N id);
+    <N extends Number> Integer deleteByIds(List<N> ids);
 
     /**
      * 创建记录
@@ -74,11 +74,11 @@ public interface IBaseService<R, T> {
      * @param update
      * @return
      */
-    boolean update(Long id, T update);
+    boolean update(Number id, T update);
 
-    List<R> queryAllMatch(T param);
-    List<R> queryAnyMatch(T param);
-    List<R> queryByExample(Example example);
+    <R> List<R> queryAllMatch(T param,Class<R> resultClass);
+    <R> List<R> queryAnyMatch(T param,Class<R> resultClass);
+    <R> List<R> queryByExample(Example example,Class<R> resultClass);
 
     Example buildAllMatch(T param);
     Example buildAnyMatch(T param);
@@ -96,11 +96,11 @@ public interface IBaseService<R, T> {
     boolean existAnyMatch(T param);
     boolean existByExample(Example example);
 
-    PageInfo<R> pageAllMatch(T param, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageAllMatch(T param, String orderField, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageAllMatch(T param, String orderField, Direction direction, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageAnyMatch(T param, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageAnyMatch(T param, String orderField, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageAnyMatch(T param, String orderField, Direction direction, Integer pageNum, Integer pageSize);
-    PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize);
+    <R> PageInfo<R> pageAllMatch(T param, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageAllMatch(T param, String orderField, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageAllMatch(T param, String orderField, Direction direction, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageAnyMatch(T param, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageAnyMatch(T param, String orderField, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageAnyMatch(T param, String orderField, Direction direction, Integer pageNum, Integer pageSize,Class<R> resultClass);
+    <R> PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize,Class<R> resultClass);
 }

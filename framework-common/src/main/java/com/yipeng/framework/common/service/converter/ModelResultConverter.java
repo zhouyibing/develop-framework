@@ -5,9 +5,10 @@ import cn.hutool.core.util.ReflectUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.yipeng.framework.common.constants.ConvertRule;
-import com.yipeng.framework.common.constants.annotation.Convert;
-import com.yipeng.framework.common.constants.annotation.ConvertIgnore;
+import com.yipeng.framework.common.constants.CaseRule;
+import com.yipeng.framework.common.constants.Direction;
+import com.yipeng.framework.common.constants.annotation.ConvertExclude;
+import com.yipeng.framework.common.constants.annotation.ConvertInclude;
 import com.yipeng.framework.common.constants.annotation.FieldMapping;
 import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
@@ -18,9 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -30,8 +29,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ModelResultConverter {
-    private Map<Class, Set<String>> ignoresMap = new ConcurrentHashMap<>();
-    private Map<Class, ConvertRule> convertRuleMap = new ConcurrentHashMap<>();
+    private Map<Class, Set<String>> includeMap = new ConcurrentHashMap<>();
+    private Map<Class, Set<String>> excludeMap = new ConcurrentHashMap<>();
     private Map<Class, List<Field>> fieldsMap = new ConcurrentHashMap<>();
     private Map<Class, Set<String>> fieldNamesMap = new ConcurrentHashMap<>();
     private Map<Class, Converter> convertersMap = new ConcurrentHashMap<>();
@@ -41,25 +40,31 @@ public class ModelResultConverter {
      * @param clazz
      */
     public void fetchMeta(Class clazz) {
-        ignoresMap.computeIfAbsent(clazz, (clz) -> {
-            Annotation convert =  clz.getAnnotation(Convert.class);
-            if(convert != null) {
-                String[] ignores = ((Convert)convert).ignores();
-                if(ignores != null && ignores.length >0) {
-                    return Sets.newHashSet(ignores);
-                }
+        excludeMap.computeIfAbsent(clazz, (clz) -> {
+            Annotation convertExclude =  clz.getAnnotation(ConvertExclude.class);
+            Annotation convertInclude =  clz.getAnnotation(ConvertInclude.class);
+            String[] includes = null;
+            String[] excludes = null;
+            if(convertInclude != null) {
+                includes = ((ConvertInclude)convertInclude).value();
             }
-            return Sets.newHashSet();
-        });
-        convertRuleMap.computeIfAbsent(clazz, (clz) -> {
-            Annotation convert =  clz.getAnnotation(Convert.class);
-            if(convert != null) {
-                ConvertRule rule = ((Convert)convert).rule();
-                if(rule != null) {
-                    return rule;
-                }
+            if(convertExclude != null) {
+                excludes = ((ConvertExclude)convertExclude).value();
             }
-            return ConvertRule.FULL_NAME;
+            Set<String> excludeSet = Sets.newHashSet();
+            Set<String> includeSet = Sets.newHashSet();
+            if(includes !=null && includes.length>0) {
+                includeSet = Sets.newHashSet(includes);
+                includeMap.put(clz, includeSet);
+            } else {
+                includeMap.put(clz,includeSet);
+            }
+            if(excludes != null && excludes.length >0) {
+                excludeSet = Sets.newHashSet(excludes);
+                if(Sets.intersection(excludeSet, includeSet).size()>0)
+                    throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("需要转换字段和忽略字段列表中不能有重复:exclude="+excludeSet+",include="+includeSet));
+            }
+            return excludeSet;
         });
         fieldsMap.computeIfAbsent(clazz, (clz) -> {
             Field[] allFields = ReflectUtil.getFields(clz);
@@ -124,11 +129,11 @@ public class ModelResultConverter {
         return fields;
     }
 
-    public <T> void toDbModel(Object[] kvs, T dbModel) {
-        toDbModel(kvs, dbModel, false, null);
+    public <T> void convert(Object[] kvs, T dbModel) {
+        convert(kvs, dbModel, false, null);
     }
 
-    public <T> void toDbModel(Object[] kvs, T dbModel, boolean ignoreCase, Set<String> ignoreFields) {
+    public <T> void convert(Object[] kvs, T dbModel, boolean ignoreCase, Set<String> ignoreFields) {
         if(kvs == null || kvs.length == 0 || kvs.length%2 !=0) {
             throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("名值对数组必须成对"));
         }
@@ -166,19 +171,19 @@ public class ModelResultConverter {
      * @param dbModel 目标对象
      * @param <T>
      */
-    public <T> void toDbModel(Map<String, Object> params, T dbModel) {
-        toDbModel(params, dbModel, false, null);
+    public <T> void convert(Map<String, Object> params, T dbModel) {
+        convert(params, dbModel, false, null);
     }
 
     /**
-     * 从map里提取字段并设置到dbModel对象里
+     * 从map里提取字段并设置到target对象里
      * @param params 字段名-字段值参数map
      * @param dbModel 目标对象
      * @param ignoreCase 是否忽略大小写
      * @param ignoreFields 忽略的字段列表
      * @param <T>
      */
-    public <T> void toDbModel(Map<String, Object> params, T dbModel, boolean ignoreCase, Set<String> ignoreFields) {
+    public <T> void convert(Map<String, Object> params, T dbModel, boolean ignoreCase, Set<String> ignoreFields) {
         if(CollectionUtil.isEmpty(params) || dbModel == null) return;
         List<Field> fields = getFields(dbModel.getClass());
         if(CollectionUtil.isEmpty(fields)) return;
@@ -207,66 +212,50 @@ public class ModelResultConverter {
             throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
         }
     }
+    public <S> void convert(S source, Map<String, Object> target, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) {
+        try {
+            target.putAll(getFieldMap(source, extraIgnoreFields, notIgnoreFields));
+        } catch (Exception e) {
+            log.error("convert failed", e);
+            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+        }
+    }
 
-    public <M,R> void toDbModel(R param, M dbModel) {
-        toDbModel(param, dbModel, null, null);
+    public <S,T> void convert(S source, T target) {
+        convert(source, target, null, null);
     }
 
     /**
-     * 将参数对象转换给dbModel对象
-     * @param param 参数对象
-     * @param dbModel 数据库对象
+     * 将参数对象转换给target对象
+     * @param source 源对象
+     * @param target 目标对象
      * @param extraIgnoreFields 额外忽略字段列表
      * @param notIgnoreFields 不需要忽略的字段列表
      */
-    public <M,R> void toDbModel(R param, M dbModel, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) {
-        Class paramClass = param.getClass();
-        Class dbModelClass = dbModel.getClass();
-        fetchMeta(paramClass);
-        fetchMeta(dbModelClass);
-        Set<String> ignoreList = calcIgnoreFields(paramClass, extraIgnoreFields, notIgnoreFields);
-        List<Field> paramClassFields = fieldsMap.get(paramClass);
-        List<Field> dbModelClassFields = fieldsMap.get(dbModelClass);
-        ConvertRule convertRule = convertRuleMap.get(paramClass);
+    public <S,T> void convert(S source, T target, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) {
+        Class targetClass = target.getClass();
+        fetchMeta(targetClass);
+        List<Field> targetClassFields = fieldsMap.get(targetClass);
         try {
-            Map<String, Object> paramFieldMap = Maps.newHashMapWithExpectedSize(paramClassFields.size());
-            Map<String, Converter> paramFieldConverterMap = Maps.newHashMapWithExpectedSize(paramClassFields.size());
-            for (Field f : paramClassFields) {
-                ConvertIgnore convertIgnore = f.getAnnotation(ConvertIgnore.class);
-                FieldMappingResult fieldMappingResult = getFieldMappingResult(f);
-                //过滤掉不需要转换字段
-                if ((convertIgnore == null && !ignoreList.contains(f.getName())) ||
-                        (null != notIgnoreFields && notIgnoreFields.contains(f.getName()))) {
-                    String fieldInMapping = StringUtils.isNotBlank(fieldMappingResult.fieldName) ? fieldMappingResult.fieldName : null;
-                    String fieldName = fieldInMapping !=null ? fieldInMapping : f.getName();
-                    if (convertRule == ConvertRule.IGNORE_CASE) {
-                        fieldName = fieldInMapping != null ? fieldName.toLowerCase() : f.getName().toLowerCase();
-                    }
-                    paramFieldMap.put(fieldName, f.get(param));
-                    Converter converter = getConverter(fieldMappingResult);
-                    if(converter != null) {
-                        paramFieldConverterMap.put(fieldName, converter);
-                    }
-                }
-            }
-
-            //将param拷贝给dbmodel
-            for(Field f : dbModelClassFields) {
-                Object value = null;
+            Map<String,Object> paramFieldMap = getFieldMap(source, extraIgnoreFields, notIgnoreFields);
+            //将param拷贝给target
+            for(Field f : targetClassFields) {
+                List<FieldMappingResult> fieldMappingResults = getFieldMappingResult(f, Direction.IN);
                 Converter converter = null;
-                if(convertRule == ConvertRule.IGNORE_CASE) {
-                    String lowCaseFieldName = f.getName().toLowerCase();
-                    value = paramFieldMap.get(lowCaseFieldName);
-                    converter = paramFieldConverterMap.get(lowCaseFieldName);
-                } else {
-                    value = paramFieldMap.get(f.getName());
-                    converter = paramFieldConverterMap.get(f.getName().toLowerCase());
+                Object value = null;
+                for(FieldMappingResult fieldIn : fieldMappingResults) {
+                    if(CaseRule.IGNORE_CASE == fieldIn.caseRule) {
+                        value = paramFieldMap.get(f.getName().toLowerCase());
+                    } else {
+                        value = paramFieldMap.get(f.getName());
+                    }
+                    if(null == value) continue;
+                    converter = getConverter(fieldIn);
+                    break;//选择第一个
                 }
 
-                if(null == value) {
-                    continue;
-                }
-                setFieldValue(f, dbModel, value, converter);
+                value = null == value ? paramFieldMap.get(f.getName()) : value;
+                setFieldValue(f, target, value, converter);
             }
 
         }catch (Exception e) {
@@ -274,40 +263,92 @@ public class ModelResultConverter {
             throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
         }
     }
-    public <M,R> void toResult(M dbModel, R result) {
-        toResult(dbModel, result, null, null);
-    }
 
-    private Set<String> calcIgnoreFields(Class clazz, Set<String> extraIgnoreFields,Set<String> notIgnoreFields) {
-        Set<String> ignoreList = ignoresMap.get(clazz);
-        if(null != extraIgnoreFields) {
-            ignoreList.addAll(extraIgnoreFields);
-        }
-        if(null != notIgnoreFields) {
-            notIgnoreFields.forEach(fieldName -> {
-                ignoreList.remove(fieldName);
-            });
-        }
-        return ignoreList;
-    }
-
-    private FieldMappingResult getFieldMappingResult(Field field) {
-        FieldMapping fieldMapping = field.getAnnotation(FieldMapping.class);
-        String fieldName = null;
-        Class converterClass = null;
-        boolean isConverter = false;
-        if(fieldMapping != null) {
-            fieldName = fieldMapping.value();
-            converterClass = fieldMapping.converter();
-            isConverter = Converter.class.isAssignableFrom(converterClass);
-            if(!isConverter) {
-                log.warn("'{}' is not a converter of 'com.yipeng.framework.common.service.converter.Converter'", converterClass.getName());
+    private <S> Map<String,Object> getFieldMap(S param, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) throws IllegalAccessException {
+        Class sourceClass = param.getClass();
+        fetchMeta(sourceClass);
+        Set<String> excludeList = calcExcludeFields(sourceClass, extraIgnoreFields);
+        Set<String> includeList = calIncludeFields(sourceClass,notIgnoreFields);
+        List<Field> sourceClassFields = fieldsMap.get(sourceClass);
+        Map<String, Object> paramFieldMap = Maps.newHashMapWithExpectedSize(sourceClassFields.size());
+        for (Field f : sourceClassFields) {
+            ConvertExclude convertExclude = f.getAnnotation(ConvertExclude.class);
+            //过滤掉不需要转换字段
+            if ((convertExclude == null && !excludeList.contains(f.getName())) || includeList.contains(f.getName())) {
+                List<FieldMappingResult> fieldMappingResults = getFieldMappingResult(f, Direction.OUT);
+                boolean mappedSelf = false;
+                for(FieldMappingResult fieldOut : fieldMappingResults) {
+                    Converter converter = getConverter(fieldOut);
+                    Object value = f.get(param);
+                    if(fieldOut.fieldName.equals(f.getName())) {
+                        mappedSelf = true;
+                    }
+                    if(converter != null) {
+                        value = convertValue(f, value, converter);
+                    }
+                    if(CaseRule.IGNORE_CASE == fieldOut.caseRule) {
+                        paramFieldMap.put(fieldOut.fieldName.toLowerCase(), value);
+                    } else {
+                        paramFieldMap.put(fieldOut.fieldName, value);
+                    }
+                }
+                //字段原始名需要加入
+                if(!mappedSelf) {
+                    paramFieldMap.put(f.getName(), f.get(param));
+                }
             }
         }
-        return new FieldMappingResult(fieldName, converterClass, isConverter);
+        return paramFieldMap;
+    }
+
+    private Set<String> calcExcludeFields(Class clazz, Set<String> extraIgnoreFields) {
+        Set<String> excludeList = excludeMap.get(clazz);
+        if(null != extraIgnoreFields) {
+            excludeList.addAll(extraIgnoreFields);
+        }
+        return excludeList;
+    }
+
+    private Set<String> calIncludeFields(Class clazz,Set<String> includeFields) {
+        Set<String> includeList = includeMap.get(clazz);
+        if(null != includeFields) {
+            includeList.addAll(includeFields);
+        }
+        return includeList;
+    }
+
+    private List<FieldMappingResult> getFieldMappingResult(Field field, Direction direction) {
+        FieldMapping[] fieldMappings = field.getAnnotationsByType(FieldMapping.class);
+        if(null == fieldMappings) return Lists.newArrayList();
+        List<FieldMappingResult> fieldMappingResults = Lists.newArrayListWithExpectedSize(fieldMappings.length);
+        for(FieldMapping fieldMapping : fieldMappings) {
+            String fieldName = fieldMapping.name();
+            Class converterClass = fieldMapping.converter();
+            if(StringUtils.EMPTY.equals(fieldName)) {
+                fieldName = field.getName();
+            }
+            boolean isConverter = converterClass == Converter.class ? false : Converter.class.isAssignableFrom(converterClass);
+            if(direction == null || Direction.BOTH == direction || fieldMapping.direction() == direction) {
+                fieldMappingResults.add(new FieldMappingResult(fieldName, converterClass, isConverter, fieldMapping.caseRule(), fieldMapping.direction()));
+            }
+        }
+
+        return fieldMappingResults;
+    }
+
+    private Object convertValue(Field field, Object value, Converter converter) {
+        if(converter != null) {
+            if(field.getType() == converter.targetClass()) {
+                return converter.reverse(value);
+            } else if( field.getType() == converter.sourceClass()){
+                return converter.convert(value);
+            }
+        }
+        return value;
     }
 
     private <T,V> void setFieldValue(Field field, T target, V value, Converter converter) throws IllegalAccessException {
+        if(value == null) return;
         if(converter != null) {
             if(field.getType() == converter.targetClass()) {
                 field.set(target, converter.convert(value));
@@ -338,70 +379,13 @@ public class ModelResultConverter {
         return null;
     }
 
-    /**
-     * 将数据库对象转换为目标结果对象
-     * @param dbModel 数据库对象
-     * @param result 结果对象
-     * @param extraIgnoreFields 额外忽略字段列表
-     * @param notIgnoreFields 不需要忽略的字段列表
-     * @param <M>
-     * @param <R>
-     */
-    public <M,R> void toResult(M dbModel, R result, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) {
-        Class dbModelClass = dbModel.getClass();
-        Class resultClass = result.getClass();
-        fetchMeta(dbModelClass);
-        fetchMeta(resultClass);
-        Set<String> ignoreList = calcIgnoreFields(dbModelClass, extraIgnoreFields, notIgnoreFields);
-
-        List<Field> dbmodelClassFields = fieldsMap.get(dbModelClass);
-        ConvertRule convertRule = convertRuleMap.get(dbModelClass);
-        List<Field> resultClassFields = fieldsMap.get(resultClass);
-        try {
-            Map<String, Object> dbModelFieldMap = Maps.newHashMapWithExpectedSize(dbmodelClassFields.size());
-            for (Field f : dbmodelClassFields) {
-                ConvertIgnore convertIgnore = f.getAnnotation(ConvertIgnore.class);
-
-                //过滤掉不需要转换字段
-                if ((convertIgnore == null && !ignoreList.contains(f.getName())) ||
-                        (null != notIgnoreFields && notIgnoreFields.contains(f.getName()))) {
-                    if (convertRule == ConvertRule.FULL_NAME) {
-                        dbModelFieldMap.put(f.getName(), f.get(dbModel));
-                    } else if(convertRule == ConvertRule.IGNORE_CASE) {
-                        dbModelFieldMap.put(f.getName().toLowerCase(), f.get(dbModel));
-                    }
-                }
-            }
-            //将source拷贝给target
-            for(Field f : resultClassFields) {
-                FieldMappingResult fieldMappingResult = getFieldMappingResult(f);
-                String fieldInMapping = StringUtils.isNotBlank(fieldMappingResult.fieldName) ? fieldMappingResult.fieldName : null;
-                String fieldName = fieldInMapping !=null ? fieldInMapping : f.getName();
-                if (convertRule == ConvertRule.IGNORE_CASE) {
-                    fieldName = fieldInMapping != null ? fieldName.toLowerCase() : f.getName().toLowerCase();
-                }
-
-                Object value = dbModelFieldMap.get(fieldName);
-
-                if(null == value) {
-                    continue;
-                }
-                Converter converter = getConverter(fieldMappingResult);
-                setFieldValue(f, result, value, converter);
-            }
-            //clear map,help gc
-            dbModelFieldMap.clear();
-            ignoreList.clear();
-        }catch (Exception e) {
-            log.error("convert failed", e);
-            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
-        }
-    }
 
     @AllArgsConstructor
     class FieldMappingResult{
         private String fieldName;
         private Class converterClass;
         private boolean legalConverter;
+        private CaseRule caseRule;
+        private Direction direction;
     }
 }

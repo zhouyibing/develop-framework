@@ -110,7 +110,7 @@ public class ErrorCode {
     }
 
     private String assembleCode(String code) {
-        return ConfigUtils.getProperty("appInfo.systemId").concat(ConfigUtils.getProperty("appInfo.serviceId")).concat(code);
+        return ConfigUtils.getProperty("dev-framework.appInfo.systemId").concat(ConfigUtils.getProperty("dev-framework.appInfo.serviceId")).concat(code);
     }
 
     @Override

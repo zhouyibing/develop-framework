@@ -11,8 +11,8 @@ import com.yipeng.framework.common.model.ResultOverview;
 import com.yipeng.framework.common.model.ValidList;
 import com.yipeng.framework.common.param.PageParam;
 import com.yipeng.framework.common.result.Result;
-import com.yipeng.framework.common.service.BaseService;
 import com.yipeng.framework.common.model.Intensifier;
+import com.yipeng.framework.common.service.BaseService;
 import com.yipeng.framework.common.utils.Precondition;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -33,12 +33,13 @@ import java.util.function.Function;
 /**
  * @author: yibingzhou
  */
-public class BaseController<P extends BaseParam, S extends BaseService> implements BaseApi<P> {
+public abstract class BaseController<P extends BaseParam, S extends BaseService> implements BaseApi<P> {
     private final static String HEADER_TOKEN = "token";
     protected final static String ALL = "*";
 
     @Autowired
     protected S service;
+
     protected Map<String, Set<Intensifier>> intensifierMap = new HashMap<>();
     private Comparator<Intensifier> intensifierComparable = (o1, o2) -> {
         if(o1.getPriority() == o2.getPriority()) return 0;
@@ -55,6 +56,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
         intensifiers.add(intensifier);
     }
 
+    protected abstract Class defaultResultClass();
     /**
      * 从header里获取token
      * @return
@@ -79,6 +81,22 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     }
 
     @Override
+    @PostMapping("/creatIfAbsent")
+    @ApiOperation("不存在时创建")
+    public Result creatIfAbsent(@Valid @RequestBody P param) {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        return enhance(methodName, param, (p) -> service.createIfAbsent(p,p));
+    }
+
+    @Override
+    @PostMapping("/creat")
+    @ApiOperation("创建")
+    public Result creat(@Valid @RequestBody P param) {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        return enhance(methodName, param, (p) -> service.create(p));
+    }
+
+    @Override
     @PostMapping("/save")
     @ApiOperation("保存")
     public Result save(@Valid @RequestBody P param) {
@@ -94,10 +112,11 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
         //核心逻辑调用前的处理
         Set<Intensifier> myIntensifiers = intensifierMap.get(intensifierName);
         Set<Intensifier> allIntensifiers = intensifierMap.get(ALL);
-        if(allIntensifiers == null) allIntensifiers = Sets.newTreeSet(intensifierComparable);
-        if(myIntensifiers != null) allIntensifiers.addAll(myIntensifiers);
-        if(CollectionUtil.isNotEmpty(allIntensifiers)) {
-            for(Intensifier intensifier: allIntensifiers) {
+        Set<Intensifier> intensifiers = Sets.newTreeSet(intensifierComparable);
+        if(allIntensifiers == null) intensifiers.addAll(allIntensifiers);
+        if(myIntensifiers != null) intensifiers.addAll(myIntensifiers);
+        if(CollectionUtil.isNotEmpty(intensifiers)) {
+            for(Intensifier intensifier: intensifiers) {
                 Object ret = intensifier.getBefore() == null ? null : intensifier.getBefore().apply(param);
                 if(ret != null && intensifier.isUseBeforeEnhanceResult()) {
                     if(!param.getClass().isAssignableFrom(ret.getClass())) throw ExceptionUtil.doThrow(ErrorCode.PARAM_TYPE_NOT_MATCH.msg("前置处理返回结果类型必须是传入参数类型同类或子类"));
@@ -147,7 +166,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("批量根据id删除")
     public Result deleteByIdList(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.deleteById(p));
+        return enhance(methodName, ids, (p) -> service.deleteByIds(p));
     }
 
     @Override
@@ -171,7 +190,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("批量根据id逻辑删除")
     public Result logicDeleteByIdList(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.logicDeleteById(p));
+        return enhance(methodName, ids, (p) -> service.logicDeleteByIds(p));
     }
 
     @Override
@@ -211,7 +230,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("根据id查询")
     public Result getById(@ApiParam(name = "id", value = "id",example = "123",required = true) @RequestParam Long id) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, id, (p) -> service.queryById(p));
+        return enhance(methodName, id, (p) -> service.queryById(p, defaultResultClass()));
     }
 
     @Override
@@ -219,7 +238,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("批量根据id查询")
     public Result getByIds(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.queryByIds(p));
+        return enhance(methodName, ids, (p) -> service.queryByIds(p,defaultResultClass()));
     }
 
     @Override
@@ -227,7 +246,7 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("条件查询")
     public Result get(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, param, (p) -> service.queryAllMatch(p));
+        return enhance(methodName, param, (p) -> service.queryAllMatch(p,defaultResultClass()));
     }
 
     @Override
@@ -235,6 +254,6 @@ public class BaseController<P extends BaseParam, S extends BaseService> implemen
     @ApiOperation("分页查询")
     public PageInfo page(@Valid @RequestBody PageParam<P> pageParam) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(), p.getCurrent(), p.getPageSize()));
+        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(),p.getOrderBy(), p.getOrderType(), p.getCurrent(), p.getPageSize(),defaultResultClass()));
     }
 }

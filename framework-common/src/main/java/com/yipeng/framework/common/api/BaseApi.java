@@ -14,6 +14,14 @@ import java.util.List;
  */
 public interface BaseApi<P extends BaseParam>{
 
+    /**
+     *  不存在则插入
+     * @param param
+     * @return
+     */
+    Result creatIfAbsent(P param);
+    Result creat(P param);
+
     Result save(P param);
     Result saveList(ValidList<P> params);
 

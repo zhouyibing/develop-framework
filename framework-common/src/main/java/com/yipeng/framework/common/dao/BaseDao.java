@@ -35,7 +35,7 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
     @Getter
     protected M baseMapper;
 
-    public T queryById(Long id) {
+    public T queryById(Object id) {
         return baseMapper.selectByPrimaryKey(id);
     }
 
@@ -52,19 +52,19 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
             throw new IllegalArgumentException("id can not be null");
         }
         param.setLogicDelete(BooleanEnum.TRUE.getCode());
-        return baseMapper.updateByPrimaryKey(param);
+        return baseMapper.updateByPrimaryKeySelective(param);
     }
 
     public int logicDeleteByExample(T param, Example example) {
         param.setLogicDelete(BooleanEnum.TRUE.getCode());
-        return baseMapper.updateByExample(param,example);
+        return baseMapper.updateByExampleSelective(param,example);
     }
 
-    public int deleteByPk(Long id) {
+    public int deleteByPk(Object id) {
         return baseMapper.deleteByPrimaryKey(id);
     }
 
-    public boolean exitWithPk(Long id) {
+    public boolean exitWithPk(Object id) {
         return baseMapper.existsWithPrimaryKey(id);
     }
 

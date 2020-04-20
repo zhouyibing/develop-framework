@@ -2,10 +2,10 @@ package com.yipeng.framework.common.service;
 
 import cn.hutool.db.sql.Direction;
 import com.github.pagehelper.PageInfo;
-import com.yipeng.framework.common.service.converter.ModelResultConverter;
-import com.yipeng.framework.common.dao.BaseDao;
 import com.yipeng.framework.common.exception.ExceptionUtil;
 import com.yipeng.framework.common.model.AccessObject;
+import com.yipeng.framework.common.service.converter.ModelResultConverter;
+import com.yipeng.framework.common.dao.BaseDao;
 import com.yipeng.framework.common.model.BaseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -16,133 +16,59 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author: yibingzhou
- */
-public class BaseService <R,M extends BaseModel,T extends BaseDao>{
+public class BaseService <M extends BaseModel,T extends BaseDao>{
 
     @Autowired
     protected T dao;
     protected ModelResultConverter modelResultConverter = new ModelResultConverter();
-    private Class<R> resultClass;
     private Class<M> modelClass;
 
     public <D extends BaseDao> D getDao() {
-        return (D) dao;
+        return pojoParamService.getDao();
     }
 
-
-    public Integer logicDeleteById(List<Long> ids) {
-        return pojoParamService.logicDeleteById(ids);
+    public <N extends Number,R> R queryById(N id, Class<R> resultClass) {
+        return pojoParamService.queryById(id, resultClass);
     }
 
-    public Integer logicDeleteAllMatch(AccessObject param) {
-        return pojoParamService.logicDeleteAllMatch(param);
+    public <N extends Number,R> List<R> queryByIds(List<N> ids, Class<R> resultClass) {
+        return pojoParamService.queryByIds(ids, resultClass);
     }
 
-    public Integer logicDeleteAnyMatch(AccessObject param) {
-        return pojoParamService.logicDeleteAnyMatch(param);
-    }
-
-    public Integer logicDeleteByExample(Example example) {
-        return pojoParamService.logicDeleteByExample(example);
-    }
-
-    private PojoParamService<R,M,T> pojoParamService;
-
-    public Integer logicDeleteAllMatch(Map<String, Object> param) {
-        return mapParamService.logicDeleteAllMatch(param);
-    }
-
-    public Integer logicDeleteAnyMatch(Map<String, Object> param) {
-        return mapParamService.logicDeleteAnyMatch(param);
-    }
-
-    private MapParamService<R,M,T> mapParamService;
-
-    public Integer logicDeleteAllMatch(Object[] param) {
-        return objectArrParamService.logicDeleteAllMatch(param);
-    }
-
-    public Integer logicDeleteAnyMatch(Object[] param) {
-        return objectArrParamService.logicDeleteAnyMatch(param);
-    }
-
-    private ObjectArrParamService<R,M,T> objectArrParamService;
-
-    @PostConstruct
-    public void init() {
-        pojoParamService = new PojoParamService<>(dao, modelResultConverter, getResultClass(), getModelClass());
-        mapParamService = new MapParamService<>(dao, modelResultConverter, getResultClass(), getModelClass());
-        objectArrParamService = new ObjectArrParamService<>(dao, modelResultConverter,getResultClass(), getModelClass());
-    }
-
-    /**
-     * 获得model的class类型
-     * @return
-     */
-    private synchronized Class<M> getModelClass() {
-        if(modelClass != null ) return modelClass;
-        try {
-            ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-            modelClass = (Class<M>) pt.getActualTypeArguments()[1];
-            return modelClass;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * 获得result的class类型
-     * @return
-     */
-    private synchronized Class<R> getResultClass() {
-        if(resultClass != null ) return resultClass;
-        try {
-            ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-            resultClass = (Class<R>) pt.getActualTypeArguments()[0];
-            return resultClass;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public R queryById(Long id) {
-        return pojoParamService.queryById(id);
-    }
-
-    public List<R> queryByIds(List<Long> ids) {
-        return pojoParamService.queryByIds(ids);
-    }
-
-    public boolean logicDeleteById(Long id) {
+    public <N extends Number> boolean logicDeleteById(N id) {
         return pojoParamService.logicDeleteById(id);
     }
 
-    public boolean deleteById(Long id) {
+    public <N extends Number> Integer logicDeleteByIds(List<N> ids) {
+        return pojoParamService.logicDeleteByIds(ids);
+    }
+
+    public <N extends Number> boolean deleteById(N id) {
         return pojoParamService.deleteById(id);
     }
-    public Integer deleteById(List<Long> ids) {
-        return pojoParamService.deleteById(ids);
+
+    public <N extends Number> Integer deleteByIds(List<N> ids) {
+        return pojoParamService.deleteByIds(ids);
     }
+
     public boolean create(AccessObject param) {
         return pojoParamService.create(param);
-    }
-
-    public boolean save(AccessObject param) {
-        return pojoParamService.save(param);
-    }
-
-    public boolean createIfAbsent(AccessObject query, AccessObject create) throws ExceptionUtil.BizException {
-        return pojoParamService.createIfAbsent(query, create);
     }
 
     public Integer create(List list) {
         return pojoParamService.create(list);
     }
 
+    public boolean createIfAbsent(AccessObject query, AccessObject create) throws ExceptionUtil.BizException {
+        return pojoParamService.createIfAbsent(query, create);
+    }
+
     public Integer createIfAbsent(Example example, List create) throws ExceptionUtil.BizException {
         return pojoParamService.createIfAbsent(example, create);
+    }
+
+    public boolean save(AccessObject param) {
+        return pojoParamService.save(param);
     }
 
     public Integer save(List param) {
@@ -161,16 +87,16 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return pojoParamService.updateByExample(update, example);
     }
 
-    public boolean update(Long id, AccessObject update) {
+    public <N extends Number> boolean update(N id, AccessObject update) {
         return pojoParamService.update(id, update);
     }
 
-    public List<R> queryAllMatch(AccessObject param) {
-        return pojoParamService.queryAllMatch(param);
+    public <R> List<R> queryAllMatch(AccessObject param, Class<R> resultClass) {
+        return pojoParamService.queryAllMatch(param, resultClass);
     }
 
-    public List<R> queryAnyMatch(AccessObject param) {
-        return pojoParamService.queryAnyMatch(param);
+    public <R> List<R> queryAnyMatch(AccessObject param, Class<R> resultClass) {
+        return pojoParamService.queryAnyMatch(param, resultClass);
     }
 
     public Example buildAllMatch(AccessObject param) {
@@ -197,44 +123,56 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return pojoParamService.existAnyMatch(param);
     }
 
-    public PageInfo<R> pageAllMatch(AccessObject param, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAllMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(AccessObject param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAllMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(AccessObject param, String orderField, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAllMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(AccessObject param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAllMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(AccessObject param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(AccessObject param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(AccessObject param, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAnyMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(AccessObject param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAnyMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(AccessObject param, String orderField, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAnyMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(AccessObject param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAnyMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(AccessObject param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(AccessObject param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize, resultClass);
     }
 
-    public List<R> queryByExample(Example example) {
-        return pojoParamService.queryByExample(example);
+    public <R> List<R> queryByExample(Example example, Class<R> resultClass) {
+        return pojoParamService.queryByExample(example, resultClass);
     }
 
     public Integer deleteByExample(Example example) {
         return pojoParamService.deleteByExample(example);
     }
 
+    public Integer logicDeleteAllMatch(AccessObject param) {
+        return pojoParamService.logicDeleteAllMatch(param);
+    }
+
+    public Integer logicDeleteAnyMatch(AccessObject param) {
+        return pojoParamService.logicDeleteAnyMatch(param);
+    }
+
+    public Integer logicDeleteByExample(Example example) {
+        return pojoParamService.logicDeleteByExample(example);
+    }
+
     public boolean existByExample(Example example) {
         return pojoParamService.existByExample(example);
     }
 
-    public PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize) {
-        return pojoParamService.pageByExample(example, pageNum, pageSize);
+    public <R> PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return pojoParamService.pageByExample(example, pageNum, pageSize, resultClass);
     }
 
     public boolean needConvert() {
@@ -249,20 +187,20 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return pojoParamService.notIgnoreFields();
     }
 
-    public R convert(M baseModel) {
-        return pojoParamService.convert(baseModel);
+    public <R> R convert(M baseModel, Class<R> resultClass) {
+        return pojoParamService.convert(baseModel, resultClass);
     }
 
     public boolean create(Map<String, Object> param) {
         return mapParamService.create(param);
     }
 
-    public boolean save(Map<String, Object> param) {
-        return mapParamService.save(param);
-    }
-
     public boolean createIfAbsent(Map<String, Object> query, Map<String, Object> create) throws ExceptionUtil.BizException {
         return mapParamService.createIfAbsent(query, create);
+    }
+
+    public boolean save(Map<String, Object> param) {
+        return mapParamService.save(param);
     }
 
     public Integer updateAllMatch(Map<String, Object> query, Map<String, Object> update) {
@@ -277,16 +215,16 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return mapParamService.updateByExample(update, example);
     }
 
-    public boolean update(Long id, Map<String, Object> update) {
+    public <N extends Number> boolean update(N id, Map<String, Object> update) {
         return mapParamService.update(id, update);
     }
 
-    public List<R> queryAllMatch(Map<String, Object> param) {
-        return mapParamService.queryAllMatch(param);
+    public <R> List<R> queryAllMatch(Map<String, Object> param, Class<R> resultClass) {
+        return mapParamService.queryAllMatch(param, resultClass);
     }
 
-    public List<R> queryAnyMatch(Map<String, Object> param) {
-        return mapParamService.queryAnyMatch(param);
+    public <R> List<R> queryAnyMatch(Map<String, Object> param, Class<R> resultClass) {
+        return mapParamService.queryAnyMatch(param, resultClass);
     }
 
     public Example buildAllMatch(Map<String, Object> param) {
@@ -313,40 +251,48 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return mapParamService.existAnyMatch(param);
     }
 
-    public PageInfo<R> pageAllMatch(Map<String, Object> param, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAllMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Map<String, Object> param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAllMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(Map<String, Object> param, String orderField, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAllMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Map<String, Object> param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAllMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(Map<String, Object> param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Map<String, Object> param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Map<String, Object> param, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAnyMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Map<String, Object> param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAnyMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Map<String, Object> param, String orderField, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAnyMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Map<String, Object> param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAnyMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Map<String, Object> param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return mapParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Map<String, Object> param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return mapParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize, resultClass);
+    }
+
+    public Integer logicDeleteAllMatch(Map<String, Object> param) {
+        return mapParamService.logicDeleteAllMatch(param);
+    }
+
+    public Integer logicDeleteAnyMatch(Map<String, Object> param) {
+        return mapParamService.logicDeleteAnyMatch(param);
     }
 
     public boolean create(Object[] param) {
         return objectArrParamService.create(param);
     }
 
-    public boolean save(Object[] param) {
-        return objectArrParamService.save(param);
-    }
-
     public boolean createIfAbsent(Object[] query, Object[] create) throws ExceptionUtil.BizException {
         return objectArrParamService.createIfAbsent(query, create);
+    }
+
+    public boolean save(Object[] param) {
+        return objectArrParamService.save(param);
     }
 
     public Integer updateAllMatch(Object[] query, Object[] update) {
@@ -360,15 +306,17 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
     public Integer updateByExample(Object[] update, Example example) {
         return objectArrParamService.updateByExample(update, example);
     }
-    public boolean update(Long id, Object[] update) {
+
+    public <N extends Number> boolean update(N id, Object[] update) {
         return objectArrParamService.update(id, update);
     }
-    public List<R> queryAllMatch(Object[] param) {
-        return objectArrParamService.queryAllMatch(param);
+
+    public <R> List<R> queryAllMatch(Object[] param, Class<R> resultClass) {
+        return objectArrParamService.queryAllMatch(param, resultClass);
     }
 
-    public List<R> queryAnyMatch(Object[] param) {
-        return objectArrParamService.queryAnyMatch(param);
+    public <R> List<R> queryAnyMatch(Object[] param, Class<R> resultClass) {
+        return objectArrParamService.queryAnyMatch(param, resultClass);
     }
 
     public Example buildAllMatch(Object[] param) {
@@ -395,27 +343,62 @@ public class BaseService <R,M extends BaseModel,T extends BaseDao>{
         return objectArrParamService.existAnyMatch(param);
     }
 
-    public PageInfo<R> pageAllMatch(Object[] param, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAllMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Object[] param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAllMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(Object[] param, String orderField, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAllMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Object[] param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAllMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAllMatch(Object[] param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAllMatch(Object[] param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAllMatch(param, orderField, direction, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Object[] param, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAnyMatch(param, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Object[] param, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAnyMatch(param, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Object[] param, String orderField, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAnyMatch(param, orderField, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Object[] param, String orderField, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAnyMatch(param, orderField, pageNum, pageSize, resultClass);
     }
 
-    public PageInfo<R> pageAnyMatch(Object[] param, String orderField, Direction direction, Integer pageNum, Integer pageSize) {
-        return objectArrParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize);
+    public <R> PageInfo<R> pageAnyMatch(Object[] param, String orderField, Direction direction, Integer pageNum, Integer pageSize, Class<R> resultClass) {
+        return objectArrParamService.pageAnyMatch(param, orderField, direction, pageNum, pageSize, resultClass);
     }
+
+    public Integer logicDeleteAllMatch(Object[] param) {
+        return objectArrParamService.logicDeleteAllMatch(param);
+    }
+
+    public Integer logicDeleteAnyMatch(Object[] param) {
+        return objectArrParamService.logicDeleteAnyMatch(param);
+    }
+
+    private ObjectArrParamService<M,T> objectArrParamService;
+    private MapParamService<M,T> mapParamService;
+    private PojoParamService<M,T> pojoParamService;
+    
+    @PostConstruct
+    public void init() {
+        pojoParamService = new PojoParamService(dao, modelResultConverter, getModelClass());
+        mapParamService = new MapParamService(dao, modelResultConverter, getModelClass());
+        objectArrParamService = new ObjectArrParamService(dao, modelResultConverter, getModelClass());
+    }
+
+    /**
+     * 获得model的class类型
+     * @return
+     */
+    private synchronized Class<M> getModelClass() {
+        if(modelClass != null ) return modelClass;
+        try {
+            ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
+            modelClass = (Class<M>) pt.getActualTypeArguments()[0];
+            return modelClass;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
