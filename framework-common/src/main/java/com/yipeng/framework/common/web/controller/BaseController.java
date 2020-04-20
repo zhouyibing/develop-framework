@@ -81,17 +81,17 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
     }
 
     @Override
-    @PostMapping("/creatIfAbsent")
+    @PostMapping("/createIfAbsent")
     @ApiOperation("不存在时创建")
-    public Result creatIfAbsent(@Valid @RequestBody P param) {
+    public Result createIfAbsent(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.createIfAbsent(p,p));
     }
 
     @Override
-    @PostMapping("/creat")
+    @PostMapping("/create")
     @ApiOperation("创建")
-    public Result creat(@Valid @RequestBody P param) {
+    public Result create(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.create(p));
     }

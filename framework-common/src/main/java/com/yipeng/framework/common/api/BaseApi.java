@@ -19,8 +19,8 @@ public interface BaseApi<P extends BaseParam>{
      * @param param
      * @return
      */
-    Result creatIfAbsent(P param);
-    Result creat(P param);
+    Result createIfAbsent(P param);
+    Result create(P param);
 
     Result save(P param);
     Result saveList(ValidList<P> params);
