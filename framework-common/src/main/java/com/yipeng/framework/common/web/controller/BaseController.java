@@ -26,6 +26,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.validation.Valid;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -33,12 +34,13 @@ import java.util.function.Function;
 /**
  * @author: yibingzhou
  */
-public abstract class BaseController<P extends BaseParam, S extends BaseService> implements BaseApi<P> {
+public abstract class BaseController<P extends BaseParam, R, S extends BaseService> implements BaseApi<P> {
     private final static String HEADER_TOKEN = "token";
     protected final static String ALL = "*";
 
     @Autowired
     protected S service;
+    private Class<R> resultClass;
 
     protected Map<String, Set<Intensifier>> intensifierMap = new HashMap<>();
     private Comparator<Intensifier> intensifierComparable = (o1, o2) -> {
@@ -56,7 +58,17 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
         intensifiers.add(intensifier);
     }
 
-    protected abstract Class defaultResultClass();
+    private Class getResultClass() {
+        if(resultClass != null ) return resultClass;
+        try {
+            ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
+            resultClass = (Class<R>) pt.getActualTypeArguments()[1];
+            return resultClass;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * 从header里获取token
      * @return
@@ -113,7 +125,7 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
         Set<Intensifier> myIntensifiers = intensifierMap.get(intensifierName);
         Set<Intensifier> allIntensifiers = intensifierMap.get(ALL);
         Set<Intensifier> intensifiers = Sets.newTreeSet(intensifierComparable);
-        if(allIntensifiers == null) intensifiers.addAll(allIntensifiers);
+        if(allIntensifiers != null) intensifiers.addAll(allIntensifiers);
         if(myIntensifiers != null) intensifiers.addAll(myIntensifiers);
         if(CollectionUtil.isNotEmpty(intensifiers)) {
             for(Intensifier intensifier: intensifiers) {
@@ -230,7 +242,7 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
     @ApiOperation("根据id查询")
     public Result getById(@ApiParam(name = "id", value = "id",example = "123",required = true) @RequestParam Long id) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, id, (p) -> service.queryById(p, defaultResultClass()));
+        return enhance(methodName, id, (p) -> service.queryById(p, getResultClass()));
     }
 
     @Override
@@ -238,7 +250,7 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
     @ApiOperation("批量根据id查询")
     public Result getByIds(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.queryByIds(p,defaultResultClass()));
+        return enhance(methodName, ids, (p) -> service.queryByIds(p,getResultClass()));
     }
 
     @Override
@@ -246,7 +258,7 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
     @ApiOperation("条件查询")
     public Result get(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, param, (p) -> service.queryAllMatch(p,defaultResultClass()));
+        return enhance(methodName, param, (p) -> service.queryAllMatch(p,getResultClass()));
     }
 
     @Override
@@ -254,6 +266,6 @@ public abstract class BaseController<P extends BaseParam, S extends BaseService>
     @ApiOperation("分页查询")
     public PageInfo page(@Valid @RequestBody PageParam<P> pageParam) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(),p.getOrderBy(), p.getOrderType(), p.getCurrent(), p.getPageSize(),defaultResultClass()));
+        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(),p.getOrderBy(), p.getOrderType(), p.getCurrent(), p.getPageSize(),getResultClass()));
     }
 }
