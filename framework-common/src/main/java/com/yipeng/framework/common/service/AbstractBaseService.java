@@ -12,6 +12,7 @@ import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
 import com.yipeng.framework.common.model.BaseModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import tk.mybatis.mapper.entity.Example;
 import java.lang.reflect.Field;
@@ -275,11 +276,13 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         if(null == example) {
             return null;
         }
-
-        Example.OrderBy orderBy = example.orderBy(orderField);
-        if(direction == Direction.DESC){
+        Example.OrderBy orderBy = null;
+        if(StringUtils.isNotBlank(orderField)) {
+            orderBy = example.orderBy(orderField);
+        }
+        if(orderBy != null && direction == Direction.DESC) {
             orderBy.desc();
-        } else if(direction == Direction.ASC) {
+        } else if(orderBy != null && direction == Direction.ASC) {
             orderBy.asc();
         }
         return pageByExample(example, pageNum, pageSize,resultClass);

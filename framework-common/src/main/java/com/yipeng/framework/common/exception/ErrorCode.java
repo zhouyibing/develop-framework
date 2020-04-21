@@ -1,13 +1,8 @@
 package com.yipeng.framework.common.exception;
 
-import com.yipeng.framework.common.configuration.AppInfoConfiguration;
-import com.yipeng.framework.common.model.AppInfo;
 import com.yipeng.framework.common.utils.ConfigUtils;
 import com.yipeng.framework.common.utils.Precondition;
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.util.Objects;
 
 /**
@@ -15,7 +10,7 @@ import java.util.Objects;
  * 从左到右第1~3位标识应用/系统代码，第4~6位标识业务模块/服务代码，后三位标识具体的错误代码
  * 应用/系统代码从AppInfo里提取，在集成框架时，强制让应用设置AppInfo（便于管理和问题追踪）
  * 错误代码尽量保证全局唯一性。便于后面定位问题
- * 如：微商城-订单-下单失败 0101001
+ * 如：微商城-订单-下单失败 0010010001
  * 每个业务模块保证只有一个ErrorCode的子类，用于定义该模块内的所有错误代码
  * 业务异常代码，代码结尾为奇数
  * 奇数异常代码，代码结尾为偶数

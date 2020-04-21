@@ -31,14 +31,6 @@ public class BaseModel<K extends Number> extends AccessObject implements Seriali
     @ConvertExclude
     private Date createTime;
 
-    /** 创建者*/
-    @ConvertExclude
-    private String creatorId;
-
-    /** 更新者*/
-    @ConvertExclude
-    private String updaterId;
-
     @Column(insertable = false, updatable = false)
     /** 更新时间*/
     @ConvertExclude
