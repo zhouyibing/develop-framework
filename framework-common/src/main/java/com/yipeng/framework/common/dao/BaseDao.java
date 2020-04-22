@@ -2,6 +2,7 @@ package com.yipeng.framework.common.dao;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.util.ReflectUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
@@ -35,24 +36,12 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
     @Getter
     protected M baseMapper;
 
-    public T queryById(Object id) {
-        return baseMapper.selectByPrimaryKey(id);
+    public T queryByPk(Object pk) {
+        return baseMapper.selectByPrimaryKey(pk);
     }
 
     public List<T> queryByExample(Example example) {
         return baseMapper.selectByExample(example);
-    }
-
-    /**
-     * 根据id逻辑删除记录
-     * @param param
-     */
-    public int logicDeleteByPk(T param){
-        if(param == null || param.getId() == null) {
-            throw new IllegalArgumentException("id can not be null");
-        }
-        param.setLogicDelete(BooleanEnum.TRUE.getCode());
-        return baseMapper.updateByPrimaryKeySelective(param);
     }
 
     public int logicDeleteByExample(T param, Example example) {
@@ -60,12 +49,12 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
         return baseMapper.updateByExampleSelective(param,example);
     }
 
-    public int deleteByPk(Object id) {
-        return baseMapper.deleteByPrimaryKey(id);
+    public int deleteByPk(Object pk) {
+        return baseMapper.deleteByPrimaryKey(pk);
     }
 
-    public boolean exitWithPk(Object id) {
-        return baseMapper.existsWithPrimaryKey(id);
+    public boolean exitWithPk(Object pk) {
+        return baseMapper.existsWithPrimaryKey(pk);
     }
 
     public boolean exitWithExample(Example example) {
@@ -90,14 +79,6 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
         PageMethod.startPage(pageNum, pageSize, true, false, null);
         List<T> results = baseMapper.selectByExample(example);
         return new PageInfo<>(results);
-    }
-
-    public Integer updateByPk(T param) {
-        return baseMapper.updateByPrimaryKey(param);
-    }
-
-    public Integer updateByPkSelective(T param) {
-        return baseMapper.updateByPrimaryKeySelective(param);
     }
 
     public Integer updateByExample(T param, Example example) {

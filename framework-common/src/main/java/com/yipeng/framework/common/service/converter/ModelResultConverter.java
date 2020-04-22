@@ -110,7 +110,7 @@ public class ModelResultConverter {
                 ret.put(f.getName(), f.get(o));
             }
         } catch (Exception e) {
-
+            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR);
         }
         return ret;
     }
@@ -160,8 +160,7 @@ public class ModelResultConverter {
                 }
             }
         } catch (Exception e) {
-            log.error("convert failed", e);
-            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+            throw ExceptionUtil.doThrow(ErrorCode.OBJECT_CONVERT_FAILED.errorParams(new Object[]{kvs.getClass().getName(), dbModel.getClass().getName(), e.getMessage()}));
         }
     }
 
@@ -208,16 +207,14 @@ public class ModelResultConverter {
                 }
             });
         } catch (Exception e) {
-            log.error("convert failed", e);
-            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+            throw ExceptionUtil.doThrow(ErrorCode.OBJECT_CONVERT_FAILED.errorParams(new Object[]{params.getClass().getName(), dbModel.getClass().getName(), e.getMessage()}));
         }
     }
     public <S> void convert(S source, Map<String, Object> target, Set<String> extraIgnoreFields, Set<String> notIgnoreFields) {
         try {
             target.putAll(getFieldMap(source, extraIgnoreFields, notIgnoreFields));
         } catch (Exception e) {
-            log.error("convert failed", e);
-            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+            throw ExceptionUtil.doThrow(ErrorCode.OBJECT_CONVERT_FAILED.errorParams(new Object[]{source.getClass().getName(), target.getClass().getName(), e.getMessage()}));
         }
     }
 
@@ -259,8 +256,7 @@ public class ModelResultConverter {
             }
 
         }catch (Exception e) {
-            log.error("convert failed", e);
-            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
+            throw ExceptionUtil.doThrow(ErrorCode.OBJECT_CONVERT_FAILED.errorParams(new Object[]{source.getClass().getName(), target.getClass().getName(), e.getMessage()}));
         }
     }
 
@@ -371,7 +367,7 @@ public class ModelResultConverter {
                 try {
                     return (Converter) clz.newInstance();
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw ExceptionUtil.doThrow(ErrorCode.OBJECT_INSTANCE_FAILED);
                 }
             });
             return converter;

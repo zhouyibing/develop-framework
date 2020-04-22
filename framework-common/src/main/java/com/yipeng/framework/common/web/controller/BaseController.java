@@ -1,27 +1,24 @@
 package com.yipeng.framework.common.web.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ReflectUtil;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.yipeng.framework.common.api.BaseApi;
 import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
-import com.yipeng.framework.common.model.BaseParam;
-import com.yipeng.framework.common.model.ResultOverview;
-import com.yipeng.framework.common.model.ValidList;
+import com.yipeng.framework.common.model.*;
 import com.yipeng.framework.common.param.PageParam;
 import com.yipeng.framework.common.result.Result;
-import com.yipeng.framework.common.model.Intensifier;
 import com.yipeng.framework.common.service.BaseService;
 import com.yipeng.framework.common.utils.Precondition;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -34,15 +31,19 @@ import java.util.function.Function;
 /**
  * @author: yibingzhou
  */
-public abstract class BaseController<P extends BaseParam, R, S extends BaseService> implements BaseApi<P> {
+public class BaseController<R, S extends BaseService> implements BaseApi {
     private final static String HEADER_TOKEN = "token";
     protected final static String ALL = "*";
 
     @Autowired
     protected S service;
-    private Class<R> resultClass;
+    private Class<R> defaultResultClass;
+    /**
+     * 自定义的各方法返回结果类型，没有定义取defaultResultClass
+     */
+    private Map<String, Class> resultClassMap = new HashMap<>();
 
-    protected Map<String, Set<Intensifier>> intensifierMap = new HashMap<>();
+    private Map<String, Set<Intensifier>> intensifierMap = new HashMap<>();
     private Comparator<Intensifier> intensifierComparable = (o1, o2) -> {
         if(o1.getPriority() == o2.getPriority()) return 0;
         return o1.getPriority() > o2.getPriority() ? -1 : 1;
@@ -58,14 +59,20 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
         intensifiers.add(intensifier);
     }
 
-    private Class getResultClass() {
-        if(resultClass != null ) return resultClass;
+    protected void setResultClass(String methodName, Class clzz) {
+        resultClassMap.put(methodName, clzz);
+    }
+
+    private Class getResultClass(String methodName) {
+        Class clzz = resultClassMap.get(methodName);
+        if(clzz != null) return clzz;
+        if(defaultResultClass != null ) return defaultResultClass;
         try {
             ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-            resultClass = (Class<R>) pt.getActualTypeArguments()[1];
-            return resultClass;
+            defaultResultClass = (Class<R>) pt.getActualTypeArguments()[0];
+            return defaultResultClass;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionUtil.doThrow(ErrorCode.SERVER_INTERNAL_ERROR.msg(e.getMessage()));
         }
     }
 
@@ -95,7 +102,7 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     @Override
     @PostMapping("/createIfAbsent")
     @ApiOperation("不存在时创建")
-    public Result createIfAbsent(@Valid @RequestBody P param) {
+    public <P extends BaseParam> Result createIfAbsent(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.createIfAbsent(p,p));
     }
@@ -103,7 +110,7 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     @Override
     @PostMapping("/create")
     @ApiOperation("创建")
-    public Result create(@Valid @RequestBody P param) {
+    public <P extends BaseParam> Result create(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.create(p));
     }
@@ -111,7 +118,7 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     @Override
     @PostMapping("/save")
     @ApiOperation("保存")
-    public Result save(@Valid @RequestBody P param) {
+    public <P extends BaseParam> Result save(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.save(p));
     }
@@ -152,7 +159,7 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     @Override
     @PostMapping("/saveList")
     @ApiOperation("批量保存")
-    public Result saveList(@Valid @RequestBody ValidList<P> params) {
+    public <P extends BaseParam> Result saveList(@Valid @RequestBody ValidList<P> params) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, params, (p) -> service.save(p));
     }
@@ -160,76 +167,80 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     @Override
     @PostMapping("/delete")
     @ApiOperation("删除")
-    public Result delete(@Valid @RequestBody P param) {
+    public <P extends BaseParam> Result delete(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.deleteAllMatch(p));
     }
 
     @Override
-    @GetMapping("/deleteById")
-    @ApiOperation("根据id删除")
-    public Result deleteById(@ApiParam(name = "id", value = "id", example = "1", required = true) @RequestParam Long id) {
+    @PostMapping("/deleteByPk")
+    @ApiOperation("根据主键删除")
+    public <P extends BaseParam> Result deleteByPk(@ApiParam(name = "pk", value = "主键", required = true) @RequestBody P pk) {
+        Comparable pkValue  = getPk(pk);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, id, (p) -> service.deleteById(p));
+        return enhance(methodName, pkValue, (p) -> service.deleteByPk(p));
     }
 
     @Override
-    @PostMapping("/deleteByIdList")
-    @ApiOperation("批量根据id删除")
-    public Result deleteByIdList(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
+    @PostMapping("/deleteByPkList")
+    @ApiOperation("批量根据主键删除")
+    public <P extends BaseParam> Result deleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<P> pks) {
+        List list = getPks(pks);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.deleteByIds(p));
+        return enhance(methodName, list, (p) -> service.deleteByPks(p));
     }
 
     @Override
     @PostMapping("/logicDelete")
     @ApiOperation("逻辑删除")
-    public Result logicDelete(@RequestBody P param) {
+    public <P extends BaseParam> Result logicDelete(@RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> service.logicDeleteAllMatch(p));
     }
 
     @Override
-    @GetMapping("/logicDeleteById")
-    @ApiOperation("根据id逻辑删除")
-    public Result logicDeleteById(@ApiParam(name = "id", value = "id", example = "1", required = true) @RequestParam Long id) {
+    @PostMapping("/logicDeleteByPk")
+    @ApiOperation("根据主键逻辑删除")
+    public <P extends BaseParam> Result logicDeleteByPk(@ApiParam(name = "pk", value = "主键", example = "1", required = true) @RequestBody P pk) {
+        Comparable pkValue  = getPk(pk);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, id, (p) -> service.logicDeleteById(p));
+        return enhance(methodName, pkValue, (p) -> service.logicDeleteByPk(p));
     }
 
     @Override
-    @PostMapping("/logicDeleteByIdList")
-    @ApiOperation("批量根据id逻辑删除")
-    public Result logicDeleteByIdList(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
+    @PostMapping("/logicDeleteByPkList")
+    @ApiOperation("批量根据主键逻辑删除")
+    public <P extends BaseParam> Result logicDeleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<P> pks) {
+        List list = getPks(pks);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.logicDeleteByIds(p));
+        return enhance(methodName, list, (p) -> service.logicDeleteByPks(p));
     }
 
     @Override
     @PostMapping("/update")
     @ApiOperation("更新")
-    public Result update(@Valid @RequestBody P param) {
-        Precondition.checkNotNull(param.getId(),"id不能为空");
+    public <P extends BaseParam> Result update(@Valid @RequestBody P param) {
+        Comparable pkValue = getPk(param);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, param, (p) -> service.update(p.getId(), p));
+        return enhance(methodName, param, (p) -> service.update(pkValue, p));
     }
 
     @Override
     @PostMapping("/updateList")
     @ApiOperation("批量更新")
-    public Result updateList(@Valid @RequestBody ValidList<P> param) {
+    public <P extends BaseParam> Result updateList(@Valid @RequestBody ValidList<P> param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         return enhance(methodName, param, (p) -> {
             AtomicInteger failed = new AtomicInteger(0);
             AtomicInteger success = new AtomicInteger(0);
-            p.forEach( item -> {
-                Precondition.checkNotNull(item.getId(),"id不能为空");
-                if(service.update(item.getId(), item)){
+            List<Comparable> list = getPks(param);
+            for(int i=0;i<list.size();i++) {
+                if(service.update(list.get(i), param.get(i))) {
                     success.incrementAndGet();
                 } else {
                     failed.incrementAndGet();
                 }
-            });
+            }
             ResultOverview resultOverview = new ResultOverview();
             resultOverview.setFail(failed.get());
             resultOverview.setSuccess(success.get());
@@ -238,34 +249,54 @@ public abstract class BaseController<P extends BaseParam, R, S extends BaseServi
     }
 
     @Override
-    @GetMapping("/getById")
-    @ApiOperation("根据id查询")
-    public Result getById(@ApiParam(name = "id", value = "id",example = "123",required = true) @RequestParam Long id) {
+    @PostMapping("/getByPk")
+    @ApiOperation("根据主键查询")
+    public <P extends BaseParam> Result getByPk(@ApiParam(name = "pk", value = "主键",required = true) @RequestBody P pk) {
+        Comparable pkValue  = getPk(pk);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, id, (p) -> service.queryById(p, getResultClass()));
+        return enhance(methodName, pkValue, (p) -> service.queryByPk(p, getResultClass(methodName)));
     }
 
     @Override
-    @PostMapping("/getByIds")
-    @ApiOperation("批量根据id查询")
-    public Result getByIds(@ApiParam(name = "id", value = "id列表", required = true) @RequestBody List<Long> ids) {
+    @PostMapping("/getByPks")
+    @ApiOperation("批量根据主键查询")
+    public <P extends BaseParam> Result getByPkList(@ApiParam(name = "pks", value = "主键列表", required = true) @RequestBody List<P> pks) {
+        List list = getPks(pks);
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, ids, (p) -> service.queryByIds(p,getResultClass()));
+        return enhance(methodName, list, (p) -> service.queryByPks(p,getResultClass(methodName)));
     }
 
     @Override
     @PostMapping("/get")
     @ApiOperation("条件查询")
-    public Result get(@Valid @RequestBody P param) {
+    public <P extends BaseParam> Result get(@Valid @RequestBody P param) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, param, (p) -> service.queryAllMatch(p,getResultClass()));
+        return enhance(methodName, param, (p) -> service.queryAllMatch(p,getResultClass(methodName)));
     }
 
     @Override
     @PostMapping("/page")
     @ApiOperation("分页查询")
-    public PageInfo page(@Valid @RequestBody PageParam<P> pageParam) {
+    public <P extends BaseParam> PageInfo page(@Valid @RequestBody PageParam<P> pageParam) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(),p.getOrderBy(), p.getOrderType(), p.getCurrent(), p.getPageSize(),getResultClass()));
+        return (PageInfo) enhanceNoResultWrapped(methodName, pageParam, (p) -> service.pageAllMatch(p.getParams(),p.getOrderBy(), p.getOrderType(), p.getCurrent(), p.getPageSize(), getResultClass(methodName)));
+    }
+
+    private <P extends BaseParam> Comparable getPk(P param) {
+        Precondition.checkNotNull(param, "主键不能为空");
+        Object pkValue  = ReflectUtil.getFieldValue(param, param.primaryKey());
+        Precondition.checkNotNull(pkValue, "主键不能为空");
+        return (Comparable) pkValue;
+    }
+
+    private <P extends BaseParam> List<Comparable> getPks(List<P> pks) {
+        Precondition.checkNotEmpty(pks, "主键列表不能为空");
+        List<Comparable> list = Lists.newArrayList();
+        pks.forEach(pk -> {
+            Object pkValue = ReflectUtil.getFieldValue(pk, pk.primaryKey());
+            Precondition.checkNotNull(pkValue, "主键不能为空");
+            list.add((Comparable) pkValue);
+        });
+        return list;
     }
 }

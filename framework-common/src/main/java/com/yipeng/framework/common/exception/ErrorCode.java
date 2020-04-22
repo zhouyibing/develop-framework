@@ -24,6 +24,8 @@ public class ErrorCode {
     public final static ErrorCode ILLEGAL_ARGUMENT = new ErrorCode("0004", "参数错误");
     public final static ErrorCode CAN_NOT_NULL = new ErrorCode("0006", "参数不能为空");
     public final static ErrorCode PARAM_TYPE_NOT_MATCH = new ErrorCode("0008", "参数类型不匹配");
+    public final static ErrorCode OBJECT_INSTANCE_FAILED = new ErrorCode("0010", "对象实例化失败");
+    public final static ErrorCode OBJECT_CONVERT_FAILED = new ErrorCode("0012", "对象转换({0} to {1})失败:{3#60}");
 
     /***业务异常代码，代码结尾为奇数*/
     public final static ErrorCode BIZ_ERROR = new ErrorCode("0001", "业务异常");
@@ -90,8 +92,10 @@ public class ErrorCode {
                     } catch (NumberFormatException e){}
                 }
             }
-            String paramStr = String.valueOf(errorParams[i]);
-            msg = msg.replace(placeHolder, paramStr.substring(0,maxLen > paramStr.length() ? paramStr.length() : maxLen));
+            if(placeHolder != null) {
+                String paramStr = String.valueOf(errorParams[i]);
+                msg = msg.replace(placeHolder, paramStr.substring(0, maxLen > paramStr.length() ? paramStr.length() : maxLen));
+            }
         }
         return msg;
     }

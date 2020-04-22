@@ -12,28 +12,28 @@ import java.util.List;
  * CRUD
  * @author: yibingzhou
  */
-public interface BaseApi<P extends BaseParam>{
+public interface BaseApi{
 
     /**
      *  不存在则插入
      * @param param
      * @return
      */
-    Result createIfAbsent(P param);
-    Result create(P param);
+    <P extends BaseParam> Result createIfAbsent(P param);
+    <P extends BaseParam> Result create(P param);
 
-    Result save(P param);
-    Result saveList(ValidList<P> params);
+    <P extends BaseParam> Result save(P param);
+    <P extends BaseParam> Result saveList(ValidList<P> params);
 
-    Result delete(P param);
-    Result deleteById(Long id);
-    Result deleteByIdList(List<Long> ids);
+    <P extends BaseParam> Result delete(P param);
+    <P extends BaseParam> Result deleteByPk(P param);
+    <P extends BaseParam> Result deleteByPkList(List<P> param);
 
-    Result logicDelete(P param);
-    Result logicDeleteById(Long id);
-    Result logicDeleteByIdList(List<Long> ids);
+    <P extends BaseParam> Result logicDelete(P param);
+    <P extends BaseParam> Result logicDeleteByPk(P param);
+    <P extends BaseParam> Result logicDeleteByPkList(List<P> param);
 
-    Result update(P param);
+    <P extends BaseParam> Result update(P param);
 
     /**
      * 批量更新记录
@@ -41,13 +41,13 @@ public interface BaseApi<P extends BaseParam>{
      * @param param
      * @return
      */
-    Result updateList(ValidList<P> param);
+    <P extends BaseParam> Result updateList(ValidList<P> param);
 
-    Result getById(Long id);
+    <P extends BaseParam> Result getByPk(P param);
 
-    Result getByIds(List<Long> id);
+    <P extends BaseParam> Result getByPkList(List<P> id);
 
-    Result get(P param);
+    <P extends BaseParam> Result get(P param);
 
-    PageInfo page(PageParam<P> pageParam);
+    <P extends BaseParam> PageInfo page(PageParam<P> pageParam);
 }

@@ -17,12 +17,12 @@ public interface IBaseService<T> {
 
     <D extends BaseDao> D getDao();
 
-    <N extends Number,R> R queryById(N id,Class<R> resultClass);
-    <N extends Number,R> List<R> queryByIds(List<N> ids,Class<R> resultClass);
-    <N extends Number> boolean logicDeleteById(N id);
-    <N extends Number> Integer logicDeleteByIds(List<N> ids);
-    <N extends Number> boolean deleteById(N id);
-    <N extends Number> Integer deleteByIds(List<N> ids);
+    <K extends Comparable, R> R queryByPk(K pk,Class<R> resultClass);
+    <K extends Comparable, R> List<R> queryByPks(List<K> pks,Class<R> resultClass);
+    <K extends Comparable> boolean logicDeleteByPk(K pk);
+    <K extends Comparable> Integer logicDeleteByPks(List<K> pks);
+    <K extends Comparable> boolean deleteByPk(K pk);
+    <K extends Comparable> Integer deleteByPks(List<K> pk);
 
     /**
      * 创建记录
@@ -70,11 +70,11 @@ public interface IBaseService<T> {
     Integer updateByExample(T update, Example example);
 
     /**
-     * 根据id更新记录
+     * 根据主键更新记录
      * @param update
      * @return
      */
-    boolean update(Number id, T update);
+    <K extends Comparable> boolean update(K pk, T update);
 
     <R> List<R> queryAllMatch(T param,Class<R> resultClass);
     <R> List<R> queryAnyMatch(T param,Class<R> resultClass);

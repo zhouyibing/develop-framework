@@ -1,9 +1,11 @@
 package com.yipeng.framework.common.utils;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,14 @@ public class Precondition {
 
     public static <T> T checkNotNull(T reference, String errorMessage) {
         if (reference == null) {
+            throw ExceptionUtil.doThrow(ErrorCode.CAN_NOT_NULL.msg(errorMessage));
+        } else {
+            return reference;
+        }
+    }
+
+    public static <T> Collection<T> checkNotEmpty(Collection<T> reference, String errorMessage) {
+        if (CollectionUtil.isEmpty(reference)) {
             throw ExceptionUtil.doThrow(ErrorCode.CAN_NOT_NULL.msg(errorMessage));
         } else {
             return reference;

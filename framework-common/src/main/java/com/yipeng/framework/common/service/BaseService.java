@@ -27,28 +27,28 @@ public class BaseService <M extends BaseModel,T extends BaseDao>{
         return pojoParamService.getDao();
     }
 
-    public <N extends Number,R> R queryById(N id, Class<R> resultClass) {
-        return pojoParamService.queryById(id, resultClass);
+    public <K extends Comparable, R> R queryByPk(K pk, Class<R> resultClass) {
+        return pojoParamService.queryByPk(pk, resultClass);
     }
 
-    public <N extends Number,R> List<R> queryByIds(List<N> ids, Class<R> resultClass) {
-        return pojoParamService.queryByIds(ids, resultClass);
+    public <K extends Comparable,R> List<R> queryByPks(List<K> pks, Class<R> resultClass) {
+        return pojoParamService.queryByPks(pks, resultClass);
     }
 
-    public <N extends Number> boolean logicDeleteById(N id) {
-        return pojoParamService.logicDeleteById(id);
+    public <K extends Comparable> boolean logicDeleteByPk(K pk) {
+        return pojoParamService.logicDeleteByPk(pk);
     }
 
-    public <N extends Number> Integer logicDeleteByIds(List<N> ids) {
-        return pojoParamService.logicDeleteByIds(ids);
+    public <K extends Comparable> Integer logicDeleteByPks(List<K> pks) {
+        return pojoParamService.logicDeleteByPks(pks);
     }
 
-    public <N extends Number> boolean deleteById(N id) {
-        return pojoParamService.deleteById(id);
+    public <K extends Comparable> boolean deleteByPk(K pk) {
+        return pojoParamService.deleteByPk(pk);
     }
 
-    public <N extends Number> Integer deleteByIds(List<N> ids) {
-        return pojoParamService.deleteByIds(ids);
+    public <K extends Comparable> Integer deleteByPks(List<K> pks) {
+        return pojoParamService.deleteByPks(pks);
     }
 
     public boolean create(AccessObject param) {
@@ -87,8 +87,8 @@ public class BaseService <M extends BaseModel,T extends BaseDao>{
         return pojoParamService.updateByExample(update, example);
     }
 
-    public <N extends Number> boolean update(N id, AccessObject update) {
-        return pojoParamService.update(id, update);
+    public <K extends Comparable> boolean update(K pk, AccessObject update) {
+        return pojoParamService.update(pk, update);
     }
 
     public <R> List<R> queryAllMatch(AccessObject param, Class<R> resultClass) {
@@ -215,8 +215,8 @@ public class BaseService <M extends BaseModel,T extends BaseDao>{
         return mapParamService.updateByExample(update, example);
     }
 
-    public <N extends Number> boolean update(N id, Map<String, Object> update) {
-        return mapParamService.update(id, update);
+    public <K extends Comparable> boolean update(K pk, Map<String, Object> update) {
+        return mapParamService.update(pk, update);
     }
 
     public <R> List<R> queryAllMatch(Map<String, Object> param, Class<R> resultClass) {
@@ -307,8 +307,8 @@ public class BaseService <M extends BaseModel,T extends BaseDao>{
         return objectArrParamService.updateByExample(update, example);
     }
 
-    public <N extends Number> boolean update(N id, Object[] update) {
-        return objectArrParamService.update(id, update);
+    public <K extends Comparable> boolean update(K pk, Object[] update) {
+        return objectArrParamService.update(pk, update);
     }
 
     public <R> List<R> queryAllMatch(Object[] param, Class<R> resultClass) {

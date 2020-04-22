@@ -19,7 +19,7 @@ import java.util.Date;
  * @author: yibingzhou
  */
 @Data
-public class BaseModel<K extends Number> extends AccessObject implements Serializable{
+public class BaseModel<K extends Comparable> extends AccessObject implements Serializable{
 
     private static final long serialVersionUID = 2341576501122011554L;
     @Id
@@ -40,4 +40,13 @@ public class BaseModel<K extends Number> extends AccessObject implements Seriali
     @FieldMapping(name = "deleted",direction = Direction.OUT, converter = BooleanIntegerConverter.class)
     @ConvertExclude
     private Integer logicDelete = BooleanEnum.FALSE.getCode();
+
+    /**
+     * 定义主键名称
+     * 子类如果想要改名，重写这个方法
+     * @return
+     */
+    public String primaryKeyName(){
+        return "id";
+    }
 }
