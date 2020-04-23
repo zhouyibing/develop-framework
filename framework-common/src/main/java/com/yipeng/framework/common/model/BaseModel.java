@@ -28,17 +28,12 @@ public class BaseModel<K extends Comparable> extends AccessObject implements Ser
 
     @Column(insertable = false, updatable = false)
     /** 创建时间*/
-    @ConvertExclude
     private Date createTime;
 
     @Column(insertable = false, updatable = false)
     /** 更新时间*/
-    @ConvertExclude
     private Date updateTime;
-
     /** 逻辑删除标识*/
-    @FieldMapping(name = "deleted",direction = Direction.OUT, converter = BooleanIntegerConverter.class)
-    @ConvertExclude
     private Integer logicDelete = BooleanEnum.FALSE.getCode();
 
     /**

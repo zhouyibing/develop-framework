@@ -272,5 +272,6 @@
         <module>framework-trace</module>
         <module>framework-test</module>
         <module>framework-canary</module>
+        <module>framework-projectBuilder</module>
     </modules>
 </project>
