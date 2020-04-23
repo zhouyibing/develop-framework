@@ -60,6 +60,7 @@ public class Builder {
         dataMap.put("project", projectMeta);
         dataMap.put("datasource", dataSourcInfo);
         dataMap.put("base", baseInfo);
+        generator(dataMap, projectMeta.getRootClassPath()+File.separator+"constant",projectMeta.getApplicationName()+"ErrorCode.java", "ErrorCode.ftl");
         generator(dataMap, projectMeta.getRootPath()+File.separator+"src"+File.separator+"main"+File.separator+"resources","application.yml", "Properties.ftl");
     }
 
