@@ -17,6 +17,7 @@ public class ${object.name}Result {
 	<#list object.fields as item>
 		<#if item.notInResult == false>
 			<#if (item.fieldComment)??>
+
 	@ApiModelProperty("${item.fieldComment}")
 			</#if>
 			<#if item.date == true>

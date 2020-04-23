@@ -23,6 +23,7 @@ public class ${object.name}Param extends BaseParam {
 	<#if (object.fields)??>
 		<#list object.fields as item>
 			<#if item.notInParam == false>
+
 				<#if (item.fieldComment)??>
 	@ApiModelProperty("${item.fieldComment}")
 				</#if>
