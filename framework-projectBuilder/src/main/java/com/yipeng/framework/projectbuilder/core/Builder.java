@@ -168,7 +168,7 @@ public class Builder {
         dbModelMeta.setName(convertSnakeToPasca(table.getFormattedName()));
         dbModelMeta.setCamelName(convertSnakeToCamel(table.getFormattedName()));
         dbModelMeta.setOriginalTableName(table.getOriginalName());
-        if(table.getRemarks().lastIndexOf("表") == table.getRemarks().length()-1)
+        if(!StringUtils.isEmpty(table.getRemarks()) && table.getRemarks().lastIndexOf("表") == table.getRemarks().length()-1)
             table.setRemarks(table.getRemarks().substring(0,table.getRemarks().length()-1));
         dbModelMeta.setComment(table.getRemarks());
         dbModelMeta.setPrimaryKeyName(table.getPrimaryKeyName());
