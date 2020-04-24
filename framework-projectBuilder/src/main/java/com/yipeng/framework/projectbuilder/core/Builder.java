@@ -22,12 +22,16 @@ public class Builder {
     private static Map<String,Set<String>> notInModelMap;
     private static Map<String,Set<String>> notInParamMap;
     private static Map<String,Set<String>> notInResultMap;
+    private static Set<String> noDao;
+    private static Set<String> noService;
+    private static Set<String> noController;
     private static Map<String,Object> baseInfo;
 
     public static void build() {
        notInModelMap = notInMap(BuildProperties.getString("builder.tables.notInModel"));
        notInParamMap = notInMap(BuildProperties.getString("builder.tables.notInParam"));
        notInResultMap = notInMap(BuildProperties.getString("builder.tables.notInResult"));
+       noComponent();
        ProjectMeta projectMeta = getProjectMeta();
        Collection<Table> tables = DataBaseUtil.getTables();
        //生成table对象模型
@@ -39,13 +43,19 @@ public class Builder {
         for(DbModelMeta dbModelMeta : dbModelMetaList){
             generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"model"+File.separator+"db",dbModelMeta.getName()+"Model.java", "DbModel.ftl");
             generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"mapper",dbModelMeta.getName()+"Mapper.java", "Mapper.ftl");
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"dao",dbModelMeta.getName()+"Dao.java", "Dao.ftl");
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"service",dbModelMeta.getName()+"Service.java", "Service.ftl");
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"controller",dbModelMeta.getName()+"Controller.java", "Controller.ftl");
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"api",dbModelMeta.getName()+"Facade.java", "Facade.ftl");
-            dbModelMeta.setSerialId(String.valueOf(generateSerialId()));
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"result",dbModelMeta.getName()+"Result.java", "Result.ftl");
-            generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"param",dbModelMeta.getName()+"Param.java", "Param.ftl");
+            if(!noDao.contains(dbModelMeta.getOriginalTableName())) {
+                generator(dbModelMeta, projectMeta.getRootClassPath() + File.separator + "dao", dbModelMeta.getName() + "Dao.java", "Dao.ftl");
+            }
+            if(!noService.contains(dbModelMeta.getOriginalTableName())) {
+                generator(dbModelMeta, projectMeta.getRootClassPath() + File.separator + "service", dbModelMeta.getName() + "Service.java", "Service.ftl");
+            }
+            if(!noController.contains(dbModelMeta.getOriginalTableName())) {
+                generator(dbModelMeta, projectMeta.getRootClassPath() + File.separator + "controller", dbModelMeta.getName() + "Controller.java", "Controller.ftl");
+                generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"api",dbModelMeta.getName()+"Facade.java", "Facade.ftl");
+                dbModelMeta.setSerialId(String.valueOf(generateSerialId()));
+                generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"result",dbModelMeta.getName()+"Result.java", "Result.ftl");
+                generator(dbModelMeta, projectMeta.getRootClassPath()+File.separator+"param",dbModelMeta.getName()+"Param.java", "Param.ftl");
+            }
         }
         //build spring-boot bootstrap
         generator(projectMeta, projectMeta.getRootClassPath(),projectMeta.getApplicationName()+"Application.java", "Bootstrap.ftl");
@@ -89,6 +99,26 @@ public class Builder {
         projectMeta.setRootPath(projectRoot(projectMeta.getBaseDir(), projectMeta.getProjectArtifact()));
         projectMeta.setRootClassPath(generateRootClassPath(projectMeta.getRootPath(), projectMeta.getBasePackage()));
         return projectMeta;
+    }
+
+    private static void noComponent() {
+        String noDaoStr = BuildProperties.getString("builder.tables.noDao");
+        String noServiceStr = BuildProperties.getString("builder.tables.noService");
+        String noControllerStr = BuildProperties.getString("builder.tables.noController");
+        noDao = new HashSet<>();
+        noService = new HashSet<>();
+        noController = new HashSet<>();
+        if(!StringUtils.isEmpty(noDaoStr)) {
+            Collections.addAll(noDao,noDaoStr.split(","));
+        }
+        if(!StringUtils.isEmpty(noDaoStr)) {
+            Collections.addAll(noService,noServiceStr.split(","));
+            noService.addAll(noDao);
+        }
+        if(!StringUtils.isEmpty(noDaoStr)) {
+            Collections.addAll(noController,noControllerStr.split(","));
+            noController.addAll(noService);
+        }
     }
 
     private static Map<String,Set<String>> notInMap(String notIn) {
