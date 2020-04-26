@@ -11,6 +11,7 @@ import java.util.function.Supplier;
  * 异步逻辑封装，解决内部方法调用@Async方法问题
  * @author: yibingzhou
  */
+@Component
 public class AsyncHelper {
 
     /**
