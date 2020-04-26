@@ -222,13 +222,12 @@
     
    以英文输出日志，日志内容必须携带关键业务信息，例如订单ID、用户ID等，如果是异常日志，还需打印堆栈。如：
    
-       log.error("failed to update order" + orderId, exception);
+    log.error("failed to update order" + orderId, exception); 
+
+  判断字符串是否为空
    
-                    
-    判断字符串是否为空
-    
-   在web程序中判断一个字段是否为空时，仅检查它是否为null或者length是否为0是不够的，因为还有空白字符（空格、换行等不可见字符）的存在。
-   应使用 jakarta commons的  StringUtils.isBlank()来判断字段是否为空。
+  在web程序中判断一个字段是否为空时，仅检查它是否为null或者length是否为0是不够的，因为还有空白字符（空格、换行等不可见字符）的存在。
+  应使用 jakarta commons的  StringUtils.isBlank()来判断字段是否为空。
    
     字符串连接操作
   
@@ -244,6 +243,7 @@
   常量与变量比较时，建议将常量放在左操作数位置。如：
      
      if (10 == a && "abc".equals(str))
+  
      
 二. 项目工程规范
    
