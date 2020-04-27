@@ -45,7 +45,9 @@ public class ExceptionUtil {
 
         private TechException(ErrorCode errorCode, Object[] errorParams) {
             super(ErrorCode.formatMsg(errorCode.getMsg(), errorParams));
-            if(!ExceptionUtil.isTechErroCode(errorCode)) throw new RuntimeException("技术异常代码最后一位必须是偶数");
+            if (!ExceptionUtil.isTechErroCode(errorCode)) {
+                throw new RuntimeException("技术异常代码最后一位必须是偶数");
+            }
             this.errorCode = errorCode.errorParams(errorParams);
         }
     }
@@ -62,7 +64,9 @@ public class ExceptionUtil {
 
         private BizException(ErrorCode errorCode, Object[] errorParams) {
             super(ErrorCode.formatMsg(errorCode.getMsg(), errorParams));
-            if(!ExceptionUtil.isBizErrorCode(errorCode)) throw new RuntimeException ("业务异常代码最后一位必须是奇数");
+            if (!ExceptionUtil.isBizErrorCode(errorCode)) {
+                throw new RuntimeException ("业务异常代码最后一位必须是奇数");
+            }
             this.errorCode = errorCode.errorParams(errorParams);
         }
     }

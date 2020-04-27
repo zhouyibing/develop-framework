@@ -18,8 +18,12 @@ public class BuildProperties {
         }
     }
     public static String getString(String key) {
-        if(null == properties) load();
-        if(null == properties) return null;
+        if (null == properties) {
+            load();
+        }
+        if (null == properties) {
+            return null;
+        }
         return properties.getProperty(key);
     }
 }

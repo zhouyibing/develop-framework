@@ -58,17 +58,23 @@ public class Precondition {
     }
 
     public static <T> T setDefault(T reference, T def) {
-        if(reference == null) return def;
+        if (reference == null) {
+            return def;
+        }
         return reference;
     }
 
     public static String setDefault(String reference, String def) {
-        if(StringUtils.isBlank(reference)) return def;
+        if (StringUtils.isBlank(reference)) {
+            return def;
+        }
         return reference;
     }
 
     public static <T> T setDefault(T reference, Supplier<T> supplier) {
-        if(reference == null) return supplier.get();
+        if (reference == null) {
+            return supplier.get();
+        }
         return reference;
     }
 
@@ -99,7 +105,7 @@ public class Precondition {
 
     public static String checkNumber(String reference, String errorMessage) {
         Boolean flag = true;
-        if (reference != null && !reference.equals("") && reference.length() >= 1) {
+        if (StringUtils.isNotBlank(reference)) {
             int i = reference.length();
 
             while(true) {

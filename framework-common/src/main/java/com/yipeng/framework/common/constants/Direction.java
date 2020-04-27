@@ -6,7 +6,13 @@ import lombok.Getter;
  * @author: yibingzhou
  */
 public enum Direction implements CodeDesEnum<Integer, Direction> {
-    IN(0,"输入"), OUT(1,"输出"),BOTH(2,"双向");
+    //输入
+    IN(0,"输入"),
+    //输出
+    OUT(1,"输出"),
+    //双向
+    BOTH(2,"双向");
+
     @Getter
     private Integer code;
     @Getter

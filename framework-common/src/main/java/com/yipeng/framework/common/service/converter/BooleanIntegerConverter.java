@@ -18,7 +18,7 @@ public class BooleanIntegerConverter implements Converter<Boolean,Integer> {
 
     @Override
     public Integer convert(Boolean aBoolean) {
-        return (null == aBoolean || aBoolean == Boolean.FALSE) ? 0 : 1;
+        return (null == aBoolean || aBoolean.equals(Boolean.FALSE)) ? 0 : 1;
     }
 
     @Override

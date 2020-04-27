@@ -18,13 +18,17 @@ public class IntegerByteConverter implements Converter<Integer, Byte> {
 
     @Override
     public Byte convert(Integer source) {
-        if(source == null) return null;
+        if (source == null) {
+            return null;
+        }
         return source.byteValue();
     }
 
     @Override
     public Integer reverse(Byte target) {
-        if(target == null) return null;
+        if (target == null) {
+            return null;
+        }
         return target.intValue();
     }
 }

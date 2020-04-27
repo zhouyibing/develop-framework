@@ -35,13 +35,17 @@ public final class AppInfo {
         private AppInfoBuilder() {
         }
         public AppInfoBuilder serviceId(String serviceId) {
-            if(serviceId.trim().length() != 3) throw new RuntimeException("业务模块/服务代码必须为3位的数字");
+            if (serviceId.trim().length() != 3) {
+                throw new RuntimeException("业务模块/服务代码必须为3位的数字");
+            }
             Precondition.checkNumber(serviceId, "业务模块/服务代码必须为3位的数字");
             this.serviceId = serviceId;
             return this;
         }
         public AppInfoBuilder systemId(String systemId) {
-            if(systemId.trim().length() != 3) throw new RuntimeException("应用/系统代码必须为3位的数字");
+            if (systemId.trim().length() != 3) {
+                throw new RuntimeException("应用/系统代码必须为3位的数字");
+            }
             Precondition.checkNumber(systemId, "应用/系统代码必须为3位的数字");
             this.systemId = systemId;
             return this;

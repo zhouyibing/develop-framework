@@ -18,13 +18,17 @@ public class IntegerShortConverter implements Converter<Integer, Short> {
 
     @Override
     public Short convert(Integer source) {
-        if(source == null) return null;
+        if (source == null) {
+            return null;
+        }
         return source.shortValue();
     }
 
     @Override
     public Integer reverse(Short target) {
-        if(target == null) return null;
+        if (target == null) {
+            return null;
+        }
         return target.intValue();
     }
 }

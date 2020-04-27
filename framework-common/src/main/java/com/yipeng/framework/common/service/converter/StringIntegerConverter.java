@@ -17,7 +17,9 @@ public class StringIntegerConverter extends StringNumberConverter<Integer>{
 
     @Override
     public Integer convert(String s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         return Integer.valueOf(s);
     }
 }

@@ -17,7 +17,9 @@ public class StringDoubleConverter extends StringNumberConverter<Double>{
 
     @Override
     public Double convert(String s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         return Double.valueOf(s);
     }
 }

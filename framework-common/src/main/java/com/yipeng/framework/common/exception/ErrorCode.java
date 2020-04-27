@@ -46,7 +46,9 @@ public class ErrorCode {
 
     public ErrorCode(String code) {
         code = assembleCode(code);
-        if(code.trim().length() != 10) throw new RuntimeException("错误代码必须为10位的数字");
+        if (code.trim().length() != 10) {
+            throw new RuntimeException("错误代码必须为10位的数字");
+        }
         Precondition.checkNumber(code, "错误代码必须为10位的数字");
         this.code = code;
     }
@@ -74,7 +76,9 @@ public class ErrorCode {
     }
 
     public static String formatMsg(String msg, Object[] errorParams) {
-        if(msg == null || errorParams == null || errorParams.length==0) return msg;
+        if (msg == null || errorParams == null || errorParams.length==0) {
+            return msg;
+        }
 
         for (int i = 0; i < errorParams.length; i++) {
             int leftIx = msg.indexOf("{");
@@ -102,8 +106,12 @@ public class ErrorCode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ErrorCode errorCode = (ErrorCode) o;
         return code.equals(errorCode.code);
     }

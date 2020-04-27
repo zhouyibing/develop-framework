@@ -45,12 +45,16 @@ public class BaseController<R, S extends BaseService> implements BaseApi {
 
     private Map<String, Set<Intensifier>> intensifierMap = new HashMap<>();
     private Comparator<Intensifier> intensifierComparable = (o1, o2) -> {
-        if(o1.getPriority() == o2.getPriority()) return 0;
+        if (o1.getPriority().equals(o2.getPriority())) {
+            return 0;
+        }
         return o1.getPriority() > o2.getPriority() ? -1 : 1;
     };
 
     protected void addIntensifier(Intensifier intensifier) {
-        if(intensifier == null) return;
+        if (intensifier == null) {
+            return;
+        }
         Set<Intensifier> intensifiers = intensifierMap.get(intensifier.getName());
         if(null == intensifiers) {
             intensifiers = Sets.newTreeSet(intensifierComparable);
@@ -65,8 +69,12 @@ public class BaseController<R, S extends BaseService> implements BaseApi {
 
     private Class getResultClass(String methodName) {
         Class clzz = resultClassMap.get(methodName);
-        if(clzz != null) return clzz;
-        if(defaultResultClass != null ) return defaultResultClass;
+        if (clzz != null) {
+            return clzz;
+        }
+        if (defaultResultClass != null ) {
+            return defaultResultClass;
+        }
         try {
             ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
             defaultResultClass = (Class<R>) pt.getActualTypeArguments()[0];
@@ -132,13 +140,19 @@ public class BaseController<R, S extends BaseService> implements BaseApi {
         Set<Intensifier> myIntensifiers = intensifierMap.get(intensifierName);
         Set<Intensifier> allIntensifiers = intensifierMap.get(ALL);
         Set<Intensifier> intensifiers = Sets.newTreeSet(intensifierComparable);
-        if(allIntensifiers != null) intensifiers.addAll(allIntensifiers);
-        if(myIntensifiers != null) intensifiers.addAll(myIntensifiers);
+        if (allIntensifiers != null) {
+            intensifiers.addAll(allIntensifiers);
+        }
+        if (myIntensifiers != null) {
+            intensifiers.addAll(myIntensifiers);
+        }
         if(CollectionUtil.isNotEmpty(intensifiers)) {
             for(Intensifier intensifier: intensifiers) {
                 Object ret = intensifier.getBefore() == null ? null : intensifier.getBefore().apply(param);
                 if(ret != null && intensifier.isUseBeforeEnhanceResult()) {
-                    if(!param.getClass().isAssignableFrom(ret.getClass())) throw ExceptionUtil.doThrow(ErrorCode.PARAM_TYPE_NOT_MATCH.msg("前置处理返回结果类型必须是传入参数类型同类或子类"));
+                    if (!param.getClass().isAssignableFrom(ret.getClass())) {
+                        throw ExceptionUtil.doThrow(ErrorCode.PARAM_TYPE_NOT_MATCH.msg("前置处理返回结果类型必须是传入参数类型同类或子类"));
+                    }
                     param = (T) ret;
                 }
             }

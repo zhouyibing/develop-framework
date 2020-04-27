@@ -47,12 +47,16 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         return (D) dao;
     }
 
+    @Override
     public <K extends Comparable, R> R queryByPk(K pk, Class<R> resultClass) {
         BaseModel result = dao.queryByPk(pk);
-        if(null == result) return null;
+        if(null == result) {
+            return null;
+        }
         return convert((M) result, resultClass);
     }
 
+    @Override
     public <K extends Comparable, R> List<R> queryByPks(List<K> pks, Class<R> resultClass) {
         Example example = new Example(modelClass);
         example.createCriteria().andIn(specialModelObj.primaryKeyName(), pks);
@@ -64,6 +68,7 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
      * @param pk
      * @return
      */
+    @Override
     public <K extends Comparable> boolean logicDeleteByPk(K pk) {
         Example example = new Example(modelClass);
         example.createCriteria().andEqualTo(specialModelObj.primaryKeyName(), pk);
@@ -82,6 +87,7 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
      * @param pk
      * @return
      */
+    @Override
     public <K extends Comparable> boolean deleteByPk(K pk) {
         return Constants.DEFAULT_AFFECT_ROWS == dao.deleteByPk(pk);
     }
@@ -99,15 +105,17 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         Boolean selective = model.getSelective();
         model.setLogicDelete(BooleanEnum.FALSE.getCode());
         if(selective != null && selective) {
-            return Constants.DEFAULT_AFFECT_ROWS == dao.insertSelective(model);
+            return Constants.DEFAULT_AFFECT_ROWS.equals(dao.insertSelective(model));
         } else {
-            return Constants.DEFAULT_AFFECT_ROWS == dao.insert(model);
+            return Constants.DEFAULT_AFFECT_ROWS.equals(dao.insert(model));
         }
     }
 
     @Override
     public Integer create(List list) {
-        if(CollectionUtil.isEmpty(list)) return Constants.NO_AFFECT_ROWS;
+        if (CollectionUtil.isEmpty(list)) {
+            return Constants.NO_AFFECT_ROWS;
+        }
         List<M> models = Lists.newArrayList();
         list.forEach(item -> {
             M model = toModel(item);
@@ -141,22 +149,24 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         Object pkValue = ReflectUtil.getFieldValue(model, model.primaryKeyName());
         if (pkValue == null) {
             if(selective != null && selective){
-                return Constants.DEFAULT_AFFECT_ROWS == dao.insertSelective(model);
+                return Constants.DEFAULT_AFFECT_ROWS.equals(dao.insertSelective(model));
             }
-            return Constants.DEFAULT_AFFECT_ROWS == dao.insert(model);
+            return Constants.DEFAULT_AFFECT_ROWS.equals(dao.insert(model));
         }
         Example example = new Example(modelClass);
         example.createCriteria().andEqualTo(model.primaryKeyName(), pkValue);
         ReflectUtil.setFieldValue(model, model.primaryKeyName(), null);
         if(selective != null && selective){
-            return Constants.DEFAULT_AFFECT_ROWS ==  dao.updateByExampleSelective(model, example);
+            return Constants.DEFAULT_AFFECT_ROWS.equals(dao.updateByExampleSelective(model, example));
         }
-        return Constants.DEFAULT_AFFECT_ROWS == dao.updateByExample(model, example);
+        return Constants.DEFAULT_AFFECT_ROWS.equals(dao.updateByExample(model, example));
     }
 
     @Override
     public Integer save(List param) {
-        if(CollectionUtil.isEmpty(param)) return Constants.NO_AFFECT_ROWS;
+        if (CollectionUtil.isEmpty(param)) {
+            return Constants.NO_AFFECT_ROWS;
+        }
         AtomicInteger affectRows = new AtomicInteger(Constants.NO_AFFECT_ROWS);
         param.forEach(item -> {
             M model = toModel(item);
@@ -214,9 +224,9 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         ReflectUtil.setFieldValue(model, model.primaryKeyName(), null);
         if(selective != null && selective){
             model.setLogicDelete(null);//不更新逻辑删除字段。
-            return Constants.DEFAULT_AFFECT_ROWS == dao.updateByExampleSelective(model, example);
+            return Constants.DEFAULT_AFFECT_ROWS.equals(dao.updateByExampleSelective(model, example));
         }
-        return Constants.DEFAULT_AFFECT_ROWS == dao.updateByExample(model, example);
+        return Constants.DEFAULT_AFFECT_ROWS.equals(dao.updateByExample(model, example));
     }
 
     @Override
@@ -231,11 +241,13 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         return queryByExample(example,resultClass);
     }
 
+    @Override
     public Example buildAllMatch(P param) {
         M model = toModel(param);
         return buildAllMatch(model);
     }
 
+    @Override
     public Example buildAnyMatch(P param) {
         M model = toModel(param);
         return buildAnyMatch(model);
@@ -337,13 +349,17 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
     }
 
     private Example buildAllMatch(M model) {
-        if(model == null) return null;
+        if (model == null) {
+            return null;
+        }
         List<Field> fields = modelResultConverter.getFields(modelClass);
         Example example = new Example(modelClass);
         Example.Criteria criteria = example.createCriteria();
         Boolean selective = model.getSelective();
         fields.forEach(field -> {
-            if(Constants.SELECTIVE.equals(field.getName())) return;//过滤selective字段
+            if (Constants.SELECTIVE.equals(field.getName())) {
+                return;//过滤selective字段
+            }
             Object value = null;
             try {
                 value = field.get(model);
@@ -361,13 +377,17 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
     }
 
     private Example buildAnyMatch(M model) {
-        if(model == null) return null;
+        if (model == null) {
+            return null;
+        }
         List<Field> fields = modelResultConverter.getFields(modelClass);
         Example example = new Example(modelClass);
         Example.Criteria criteria = example.createCriteria();
         Boolean selective = model.getSelective();
         fields.forEach(field -> {
-            if(Constants.SELECTIVE.equals(field.getName())) return;//过滤selective字段
+            if (Constants.SELECTIVE.equals(field.getName())) {
+                return;//过滤selective字段
+            }
             Object value = null;
             try {
                 value = field.get(model);
@@ -384,13 +404,19 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
         return example;
     }
 
+    @Override
     public <R> List<R> queryByExample(Example example, Class<R> resultClass) {
-        if(example == null) return Collections.emptyList();
+        if (example == null) {
+            return Collections.emptyList();
+        }
         return convert(dao.queryByExample(example), resultClass);
     }
 
+    @Override
     public Integer deleteByExample(Example example) {
-        if(example == null) return Constants.NO_AFFECT_ROWS;
+        if (example == null) {
+            return Constants.NO_AFFECT_ROWS;
+        }
         return dao.deleteByExample(example);
     }
 
@@ -408,17 +434,25 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
 
     @Override
     public Integer logicDeleteByExample(Example example) {
-        if(example == null) return Constants.NO_AFFECT_ROWS;
+        if (example == null) {
+            return Constants.NO_AFFECT_ROWS;
+        }
         return dao.logicDeleteByExample(newModelInstance(), example);
     }
 
+    @Override
     public boolean existByExample(Example example) {
-        if(null == example) throw ExceptionUtil.doThrow(ErrorCode.QUERY_PARAMS_IS_NULL);
+        if (null == example) {
+            throw ExceptionUtil.doThrow(ErrorCode.QUERY_PARAMS_IS_NULL);
+        }
         return dao.exitWithExample(example);
     }
 
+    @Override
     public <R> PageInfo<R> pageByExample(Example example, Integer pageNum, Integer pageSize, Class<R> resultClass) {
-        if(example == null) return null;
+        if (example == null) {
+            return null;
+        }
         PageInfo<M> result = dao.queryPageByExample(example, pageNum, pageSize);
         List<R> convertResult = convert(result.getList(), resultClass);
         PageInfo<R> ret = new PageInfo<>();
@@ -464,7 +498,9 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
     }
 
     private <R> List<R> convert(List<M> list, Class<R> resultClass) {
-        if(CollectionUtil.isEmpty(list)) return Collections.emptyList();
+        if (CollectionUtil.isEmpty(list)) {
+            return Collections.emptyList();
+        }
         List<R> ret = Lists.newArrayList();
         for(M m : list) {
             R r = convert(m, resultClass);

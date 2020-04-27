@@ -23,13 +23,17 @@ public class StringDecimalConverter implements Converter<String, BigDecimal> {
 
     @Override
     public BigDecimal convert(String s) {
-        if(StringUtils.isBlank(s)) return BigDecimal.ZERO;
+        if (StringUtils.isBlank(s)) {
+            return BigDecimal.ZERO;
+        }
         return new BigDecimal(s);
     }
 
     @Override
     public String reverse(BigDecimal bigDecimal) {
-        if(bigDecimal == null) return null;
+        if (bigDecimal == null) {
+            return null;
+        }
         return NumberUtils.formatNum(bigDecimal, 2);
     }
 }

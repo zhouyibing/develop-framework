@@ -82,12 +82,24 @@ public class Builder {
         String projectVersion = BuildProperties.getString("builder.projectVersion");
         String applicationName = BuildProperties.getString("builder.applicationName");
 
-        if(StringUtils.isEmpty(baseDir)) throw new NullPointerException("builder.baseDir can not be null");
-        if(StringUtils.isEmpty(basePackage)) throw new NullPointerException("builder.basePackage can not be null");
-        if(StringUtils.isEmpty(projectArtifact)) throw new NullPointerException("builder.projectArtifact can not be null");
-        if(StringUtils.isEmpty(projectGroup)) throw new NullPointerException("builder.projectGroup can not be null");
-        if(StringUtils.isEmpty(projectVersion)) throw new NullPointerException("builder.projectVersion can not be null");
-        if(StringUtils.isEmpty(applicationName)) throw new NullPointerException("builder.applicationName can not be null");
+        if (StringUtils.isEmpty(baseDir)) {
+            throw new NullPointerException("builder.baseDir can not be null");
+        }
+        if (StringUtils.isEmpty(basePackage)) {
+            throw new NullPointerException("builder.basePackage can not be null");
+        }
+        if (StringUtils.isEmpty(projectArtifact)) {
+            throw new NullPointerException("builder.projectArtifact can not be null");
+        }
+        if (StringUtils.isEmpty(projectGroup)) {
+            throw new NullPointerException("builder.projectGroup can not be null");
+        }
+        if (StringUtils.isEmpty(projectVersion)) {
+            throw new NullPointerException("builder.projectVersion can not be null");
+        }
+        if (StringUtils.isEmpty(applicationName)) {
+            throw new NullPointerException("builder.applicationName can not be null");
+        }
         ProjectMeta projectMeta = new ProjectMeta();
         projectMeta.setProjectArtifact(projectArtifact);
         projectMeta.setBaseDir(baseDir);
@@ -123,7 +135,9 @@ public class Builder {
 
     private static Map<String,Set<String>> notInMap(String notIn) {
         Map<String ,Set<String>> notInMap = new HashMap<>();
-        if(StringUtils.isEmpty(notIn)) return notInMap;
+        if (StringUtils.isEmpty(notIn)) {
+            return notInMap;
+        }
         String[] splitter = notIn.split(";");
         Arrays.stream(splitter).forEach(item -> {
             String[] tableFields = item.split("#");
@@ -166,7 +180,9 @@ public class Builder {
     }
 
     private static Map<String, Object> getBaseInfo() {
-        if(baseInfo != null) return baseInfo;
+        if (baseInfo != null) {
+            return baseInfo;
+        }
         baseInfo = new HashMap<>();
         baseInfo.put("serverPort",BuildProperties.getString("builder.base.serverPort"));
         baseInfo.put("authorName",BuildProperties.getString("builder.base.authorName"));
@@ -198,8 +214,9 @@ public class Builder {
         dbModelMeta.setName(convertSnakeToPasca(table.getFormattedName()));
         dbModelMeta.setCamelName(convertSnakeToCamel(table.getFormattedName()));
         dbModelMeta.setOriginalTableName(table.getOriginalName());
-        if(!StringUtils.isEmpty(table.getRemarks()) && table.getRemarks().lastIndexOf("表") == table.getRemarks().length()-1)
+        if (!StringUtils.isEmpty(table.getRemarks()) && table.getRemarks().lastIndexOf("表") == table.getRemarks().length()-1) {
             table.setRemarks(table.getRemarks().substring(0,table.getRemarks().length()-1));
+        }
         dbModelMeta.setComment(table.getRemarks());
         dbModelMeta.setPrimaryKeyName(table.getPrimaryKeyName());
         dbModelMeta.setSerialId(String.valueOf(generateSerialId()));
@@ -213,7 +230,9 @@ public class Builder {
 
 
     private static void convertToFieldMeta(DbModelMeta dbModelMeta, List<Column> columns) {
-       if(CollectionUtils.isEmpty(columns)) return;
+       if (CollectionUtils.isEmpty(columns)) {
+           return;
+       }
        List<FieldMeta> fieldMetas = new ArrayList<>();
         Set<String> notInModelFields = notInModelMap.get(dbModelMeta.getOriginalTableName());
         Set<String> allNotInModelFields = notInModelMap.get(ALL);
@@ -229,15 +248,21 @@ public class Builder {
            if(notInModelFields != null) {
                fieldMeta.setNotInModel(notInModelFields.contains(fieldMeta.getOriginalFieldName()));
            }
-           if(!fieldMeta.isNotInModel()) fieldMeta.setNotInModel(allNotInModelFields.contains(fieldMeta.getOriginalFieldName()));
+           if (!fieldMeta.isNotInModel()) {
+               fieldMeta.setNotInModel(allNotInModelFields.contains(fieldMeta.getOriginalFieldName()));
+           }
            if(notInParamFields != null) {
                fieldMeta.setNotInParam(notInParamFields.contains(fieldMeta.getOriginalFieldName()));
            }
-           if(!fieldMeta.isNotInParam()) fieldMeta.setNotInParam(allNotInParamFields.contains(fieldMeta.getOriginalFieldName()));
+           if (!fieldMeta.isNotInParam()) {
+               fieldMeta.setNotInParam(allNotInParamFields.contains(fieldMeta.getOriginalFieldName()));
+           }
            if(notInResultFields != null) {
                fieldMeta.setNotInResult(notInResultFields.contains(fieldMeta.getOriginalFieldName()));
            }
-           if(!fieldMeta.isNotInResult()) fieldMeta.setNotInResult(allNotInResultFields.contains(fieldMeta.getOriginalFieldName()));
+           if (!fieldMeta.isNotInResult()) {
+               fieldMeta.setNotInResult(allNotInResultFields.contains(fieldMeta.getOriginalFieldName()));
+           }
            toJavaType(dbModelMeta,fieldMeta, column.getColumnType());
            fieldMetas.add(fieldMeta);
        });

@@ -61,8 +61,9 @@ public class ModelResultConverter {
             }
             if(excludes != null && excludes.length >0) {
                 excludeSet = Sets.newHashSet(excludes);
-                if(Sets.intersection(excludeSet, includeSet).size()>0)
-                    throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("需要转换字段和忽略字段列表中不能有重复:exclude="+excludeSet+",include="+includeSet));
+                if (Sets.intersection(excludeSet, includeSet).size() > 0) {
+                    throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("需要转换字段和忽略字段列表中不能有重复:exclude=" + excludeSet + ",include=" + includeSet));
+                }
             }
             return excludeSet;
         });
@@ -138,7 +139,9 @@ public class ModelResultConverter {
             throw ExceptionUtil.doThrow(ErrorCode.ILLEGAL_ARGUMENT.msg("名值对数组必须成对"));
         }
         List<Field> fields = getFields(dbModel.getClass());
-        if(CollectionUtil.isEmpty(fields)) return;
+        if (CollectionUtil.isEmpty(fields)) {
+            return;
+        }
         Map<String, Field> nameFieldMap = fields.stream().collect(Collectors.toMap(field -> {
             if(ignoreCase) {
                 return field.getName().toLowerCase();
@@ -183,9 +186,13 @@ public class ModelResultConverter {
      * @param <T>
      */
     public <T> void convert(Map<String, Object> params, T dbModel, boolean ignoreCase, Set<String> ignoreFields) {
-        if(CollectionUtil.isEmpty(params) || dbModel == null) return;
+        if (CollectionUtil.isEmpty(params) || dbModel == null) {
+            return;
+        }
         List<Field> fields = getFields(dbModel.getClass());
-        if(CollectionUtil.isEmpty(fields)) return;
+        if (CollectionUtil.isEmpty(fields)) {
+            return;
+        }
         Map<String, Field> nameFieldMap = fields.stream().collect(Collectors.toMap(field -> {
             if(ignoreCase) {
                 return field.getName().toLowerCase();
@@ -246,7 +253,9 @@ public class ModelResultConverter {
                     } else {
                         value = paramFieldMap.get(f.getName());
                     }
-                    if(null == value) continue;
+                    if (null == value) {
+                        continue;
+                    }
                     converter = getConverter(fieldIn);
                     break;//选择第一个
                 }
@@ -315,7 +324,9 @@ public class ModelResultConverter {
 
     private List<FieldMappingResult> getFieldMappingResult(Field field, Direction direction) {
         FieldMapping[] fieldMappings = field.getAnnotationsByType(FieldMapping.class);
-        if(null == fieldMappings) return Lists.newArrayList();
+        if (null == fieldMappings) {
+            return Lists.newArrayList();
+        }
         List<FieldMappingResult> fieldMappingResults = Lists.newArrayListWithExpectedSize(fieldMappings.length);
         for(FieldMapping fieldMapping : fieldMappings) {
             String fieldName = fieldMapping.name();
@@ -344,7 +355,9 @@ public class ModelResultConverter {
     }
 
     private <T,V> void setFieldValue(Field field, T target, V value, Converter converter) throws IllegalAccessException {
-        if(value == null) return;
+        if (value == null) {
+            return;
+        }
         if(converter != null) {
             if(field.getType() == converter.targetClass()) {
                 field.set(target, converter.convert(value));

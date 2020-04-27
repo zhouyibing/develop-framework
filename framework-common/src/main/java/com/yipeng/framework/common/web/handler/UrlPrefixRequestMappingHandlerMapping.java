@@ -59,7 +59,9 @@ public class UrlPrefixRequestMappingHandlerMapping extends RequestMappingHandler
     }
 
     public RequestMappingInfo combineRequestMappingInfo(RequestMappingInfo original, String prefix) {
-        if(StringUtils.isBlank(prefix)) return original;
+        if (StringUtils.isBlank(prefix)) {
+            return original;
+        }
 
         RequestMappingInfo requestMappingInfo = RequestMappingInfo.paths(prefix).build().combine(original);
         if(log.isInfoEnabled()){

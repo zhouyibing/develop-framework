@@ -17,7 +17,9 @@ public class StringFloatConverter extends StringNumberConverter<Float>{
 
     @Override
     public Float convert(String s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         return Float.valueOf(s);
     }
 }

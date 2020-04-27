@@ -17,7 +17,9 @@ public class StringLongConverter extends StringNumberConverter<Long>{
 
     @Override
     public Long convert(String s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         return Long.valueOf(s);
     }
 }

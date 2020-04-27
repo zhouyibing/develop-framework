@@ -17,7 +17,9 @@ public class StringByteConverter extends StringNumberConverter<Byte>{
 
     @Override
     public Byte convert(String s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         return Byte.valueOf(s);
     }
 }

@@ -3,6 +3,7 @@ package com.yipeng.framework.common.model;
 import com.yipeng.framework.common.constants.Priority;
 import lombok.Getter;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 
@@ -59,5 +60,27 @@ public class Intensifier {
             this.priority = priority;
         }
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Intensifier that = (Intensifier) o;
+        return useBeforeEnhanceResult == that.useBeforeEnhanceResult &&
+                useAfterEnhanceResult == that.useAfterEnhanceResult &&
+                Objects.equals(before, that.before) &&
+                Objects.equals(after, that.after) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(priority, that.priority);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(before, after, useBeforeEnhanceResult, useAfterEnhanceResult, name, priority);
     }
 }

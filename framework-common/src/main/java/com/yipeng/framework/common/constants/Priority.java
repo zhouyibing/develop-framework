@@ -7,7 +7,12 @@ import lombok.Getter;
  * @author: yibingzhou
  */
 public enum Priority implements CodeDesEnum<Integer, Priority> {
-    LOW(0, "低"), MEDIUM(5,"中"), HIGH(10, "高");
+    //低
+    LOW(0, "低"),
+    //中
+    MEDIUM(5,"中"),
+    //高
+    HIGH(10, "高");
 
     @Getter
     private Integer code;

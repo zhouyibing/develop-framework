@@ -55,12 +55,19 @@ public class ConcurrentCacheMap<K, V> implements CacheMap<K, V> {
 		this.getUpdateTime = getUpdateTime;
 		this.queryUpdatedFrom = queryUpdatedFrom;
 	}
-	
+
+	@Override
 	public void putIfUpdated(V value) {
-		if (value != null) putIfUpdated(Arrays.asList(value));
+		if (value != null) {
+			putIfUpdated(Arrays.asList(value));
+		}
 	}
+
+	@Override
 	public void putIfUpdated(List<V> values) {
-        if (values == null || values.isEmpty()) return;
+        if (values == null || values.isEmpty()) {
+        	return;
+		}
         
         List<V> updateds = new ArrayList<>(values.size());
         for (V value : values) {
@@ -81,25 +88,36 @@ public class ConcurrentCacheMap<K, V> implements CacheMap<K, V> {
             }
             updateds.add(value);
         }
-        if (onRefresh != null && !updateds.isEmpty()) onRefresh.accept(updateds);
+        if (onRefresh != null && !updateds.isEmpty()) {
+        	onRefresh.accept(updateds);
+		}
     }
 	
 	/** 根据maxUpdateTime自动刷新缓存 */
+	@Override
 	public void refresh() {
 		long beginTime = System.currentTimeMillis();
 		List<V> values = queryUpdatedFrom.apply(maxUpdateTime);
-		if (values.isEmpty()) return;
+		if (values.isEmpty()) {
+			return;
+		}
 		
 		update(beginTime, values);
 		lastRefreshTime = beginTime;
 	}
+
 	/** 手动更新当前的缓存 */
+	@Override
 	public void update(List<V> values) {
 	    update(0, values);
 	}
+
 	/** 手动更新当前的缓存(beginTime是查询开始时间，帮助日志更好显示整个缓存更新时间) */
+	@Override
 	public void update(long beginTime, List<V> values) {
-		if (values.isEmpty()) return;
+		if (values.isEmpty()) {
+			return;
+		}
 
 		long beginProc = System.currentTimeMillis();
 		int oldSize = cache.size();
@@ -109,13 +127,21 @@ public class ConcurrentCacheMap<K, V> implements CacheMap<K, V> {
 		for (V value : values) {
 			K key = getKey.apply(value);
 			Date updateTime = getUpdateTime.apply(value);
-			if (updateTime.getTime() < lastMaxUpdateTime) continue;	//老记录
+			if (updateTime.getTime() < lastMaxUpdateTime) {
+				continue;	//老记录
+			}
 			
-			if (DateUtils.gt(updateTime, maxTime)) maxTime = updateTime;
+			if (DateUtils.gt(updateTime, maxTime)) {
+				maxTime = updateTime;
+			}
 			V old = cache.get(key);
-			if (old != null && Objects.equals(updateTime, getUpdateTime.apply(old))) continue;	//记录时间未变，则记录未变
+			if (old != null && Objects.equals(updateTime, getUpdateTime.apply(old))) {
+				continue;	//记录时间未变，则记录未变
+			}
 			
-			if (mapping != null) value = mapping.apply(value);
+			if (mapping != null) {
+				value = mapping.apply(value);
+			}
 			if (value == null) {
 				cache.remove(key);
 			} else {
@@ -137,7 +163,9 @@ public class ConcurrentCacheMap<K, V> implements CacheMap<K, V> {
 		int procSize = cache.size();
 
 		long beginOnRefresh = System.currentTimeMillis();
-		if (onRefresh != null) onRefresh.accept(values);
+		if (onRefresh != null) {
+			onRefresh.accept(values);
+		}
 		int onRefreshSize = cache.size();
 		
 		if (cache.size() != oldSize || !Objects.equals(maxTime, maxUpdateTime)) {
@@ -155,24 +183,32 @@ public class ConcurrentCacheMap<K, V> implements CacheMap<K, V> {
 		maxUpdateTime = maxTime;
 	}
 
+	@Override
 	public K getKey(V value) {
 		return getKey.apply(value);
 	}
+
+	@Override
 	public int size() {
 		return cache.size();
 	}
+
+	@Override
 	public boolean isEmpty() {
 	    return cache.isEmpty();
 	}
-	
+
+	@Override
 	public V get(K key) {
 		return key == null ? null : cache.get(key);
 	}
 
+	@Override
 	public V remove(K key) {
 		return key == null ? null : cache.remove(key);
 	}
-	
+
+	@Override
 	public Collection<V> values() {
 		return cache.values();
 	}

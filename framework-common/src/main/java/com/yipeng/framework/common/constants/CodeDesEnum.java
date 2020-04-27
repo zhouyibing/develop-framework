@@ -15,7 +15,9 @@ public interface CodeDesEnum<C,E extends Enum> {
     E[] all();
 
     default E codeOf(C code) {
-        if(code == null) throw ExceptionUtil.doThrow(ErrorCode.UNSUPPORTTED_TYPE);
+        if (code == null) {
+            throw ExceptionUtil.doThrow(ErrorCode.UNSUPPORTTED_TYPE);
+        }
         for(E type : all()) {
             if( getCode().equals(code)) {
                 return type;

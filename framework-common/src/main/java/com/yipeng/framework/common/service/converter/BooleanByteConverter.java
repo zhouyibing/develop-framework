@@ -17,7 +17,7 @@ public class BooleanByteConverter implements Converter<Boolean, Byte> {
 
     @Override
     public Byte convert(Boolean aBoolean) {
-        return (null == aBoolean || aBoolean == Boolean.FALSE) ? (byte)0 : (byte)1;
+        return (null == aBoolean || aBoolean.equals(Boolean.FALSE)) ? (byte)0 : (byte)1;
     }
 
     @Override

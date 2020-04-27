@@ -17,13 +17,17 @@ public class LongIntegerConverter implements Converter<Long, Integer> {
 
     @Override
     public Integer convert(Long aLong) {
-        if(aLong == null) return null;
+        if (aLong == null) {
+            return null;
+        }
         return aLong.intValue();
     }
 
     @Override
     public Long reverse(Integer integer) {
-        if(integer == null) return null;
+        if (integer == null) {
+            return null;
+        }
         return integer.longValue();
     }
 }

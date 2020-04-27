@@ -391,7 +391,9 @@ public class BaseService <M extends BaseModel,T extends BaseDao>{
      * @return
      */
     private synchronized Class<M> getModelClass() {
-        if(modelClass != null ) return modelClass;
+        if (modelClass != null ) {
+            return modelClass;
+        }
         try {
             ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
             modelClass = (Class<M>) pt.getActualTypeArguments()[0];

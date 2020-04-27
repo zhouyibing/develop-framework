@@ -22,12 +22,16 @@ public class NumberUtils {
     
     /** @see DecimalFormat */
     public static String format(Object obj, String pattern) {
-        if (obj == null) return null;
+        if (obj == null) {
+            return null;
+        }
         return getFormat(pattern).format(obj);
     }
     
     public static String format(BigDecimal val) {
-        if (val == null) return null;
+        if (val == null) {
+            return null;
+        }
         return formatByScale(val, val.scale());
     }
     
@@ -43,7 +47,9 @@ public class NumberUtils {
      */
     public static String getPattern(int precision) {
         return demoPatternMap.computeIfAbsent(precision, key -> {
-            if (key == -1 || key == 0) return "0";
+            if (key == -1 || key == 0) {
+                return "0";
+            }
             StringBuilder buf = new StringBuilder("0.");
             for (int i = 0; i < key; i++) {
                 buf.append('0');
@@ -59,7 +65,9 @@ public class NumberUtils {
      */
     public static String getPatternN(int precision) {
         return demoPatternNumMap.computeIfAbsent(precision, key -> {
-            if (key == -1 || key == 0) return "0";
+            if (key == -1 || key == 0) {
+                return "0";
+            }
             StringBuilder buf = new StringBuilder("0.");
             for (int i = 0; i < key; i++) {
                 buf.append('#');
@@ -74,7 +82,9 @@ public class NumberUtils {
      * @return
      */
     public static String formatNum(BigDecimal num) {
-        if (num == null) return null;
+        if (num == null) {
+            return null;
+        }
         return format(num, getPatternN(num.scale()));
     }
     
@@ -85,7 +95,9 @@ public class NumberUtils {
      * @return
      */
     public static String formatNum(BigDecimal num, int scale) {
-        if (num == null) return null;
+        if (num == null) {
+            return null;
+        }
         
         String pattern = num.scale() == 0 ? "0" : getPatternN(scale);
         return format(num, pattern);
@@ -197,14 +209,22 @@ public class NumberUtils {
     }
     
     public static boolean lte(Number value, int n) {
-        if (value == null) return true;
-        if (value.longValue() <= n) return true;
-        if (value.longValue() > n) return false;
+        if (value == null) {
+            return true;
+        }
+        if (value.longValue() <= n) {
+            return true;
+        }
+        if (value.longValue() > n) {
+            return false;
+        }
         return value.floatValue() <= n;
     }
     
     public static BigDecimal subtract(BigDecimal val1, BigDecimal val2) {
-        if (val1 == null || val2 == null) return null;
+        if (val1 == null || val2 == null) {
+            return null;
+        }
         return val1.subtract(val2);
     }
     

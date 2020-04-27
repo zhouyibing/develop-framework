@@ -93,7 +93,9 @@ public class SwaggerConfig {
 
     private List<ApiKey> securitySchemes(String[] headerParams) {
         List<ApiKey> apiKeys = Lists.newArrayList();
-        if(headerParams == null) return apiKeys;
+        if (headerParams == null) {
+            return apiKeys;
+        }
         for(String header : headerParams) {
             apiKeys.add(new ApiKey(header, header, "header"));
         }
@@ -105,10 +107,13 @@ public class SwaggerConfig {
                 SecurityContext.builder()
                         .securityReferences(defaultAuth(headerParams))
                         .forPaths(path -> {
-                            if(null == needTokenPaths) return true;
+                            if (null == needTokenPaths) {
+                                return true;
+                            }
                             for(String p : needTokenPaths) {
-                                if(pathMatcher.match(p,path))
+                                if (pathMatcher.match(p,path)) {
                                     return false;
+                                }
                             }
                             return true;
                         })
@@ -121,7 +126,9 @@ public class SwaggerConfig {
         AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
         authorizationScopes[0] = authorizationScope;
         List<SecurityReference> securityReferences = new ArrayList<>();
-        if(headerParams == null) return securityReferences;
+        if (headerParams == null) {
+            return securityReferences;
+        }
         for (String header : headerParams) {
             securityReferences.add(new SecurityReference(header, authorizationScopes));
         }

@@ -46,8 +46,9 @@ public class DataBaseUtil {
 	 */
 	private static void closeConnection(Connection connection) {
 		try {
-			if(null != connection)
-			 connection.close();
+			if (null != connection) {
+				connection.close();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -94,7 +95,9 @@ public class DataBaseUtil {
 					continue;
 				}
 				Table table  = tableMap.get(tableName);
-				if(table == null) table = new Table();
+				if (table == null) {
+					table = new Table();
+				}
 				String pk = getPrimaryKeyName(dbMetaData, null, tableName);
 				if(pk != null && !pk.equals(DEFAULT_PK)) {
 					table.setPrimaryKeyName(pk);
@@ -103,7 +106,9 @@ public class DataBaseUtil {
 				//先map在discard
 				String newName = nameMappingMap.get(tableName);
 				ResultSet columSet = dbMetaData.getColumns(dbName, dbName, tableName, "%");
-				if(newName != null) tableName = newName;
+				if (newName != null) {
+					tableName = newName;
+				}
 				for(String discard:prefixDiscardList) {
 					if(tableName.startsWith(discard)){
 						//只做一次前缀discard
@@ -129,7 +134,9 @@ public class DataBaseUtil {
 					String nullable = columSet.getString("IS_NULLABLE");
 
 					Column column = columnMap.get(columnName);
-					if(column == null) column = new Column();
+					if (column == null) {
+						column = new Column();
+					}
 					if(!StringUtils.isEmpty(columnName)) {
 						column.setColumnName(columnName);
 					}

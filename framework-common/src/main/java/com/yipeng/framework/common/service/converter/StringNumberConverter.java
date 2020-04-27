@@ -8,7 +8,9 @@ public abstract class StringNumberConverter<T extends Number> implements Convert
 
     @Override
     public String reverse(T t) {
-        if(t == null) return null;
+        if (t == null) {
+            return null;
+        }
         return t.toString();
     }
 }

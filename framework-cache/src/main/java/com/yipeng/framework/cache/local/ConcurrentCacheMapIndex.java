@@ -36,7 +36,9 @@ public class ConcurrentCacheMapIndex<K, V, S> {
 	}
 	
 	public Map<K, V> getValues(S index) {
-	    if (index == null) return null;
+	    if (index == null) {
+	        return null;
+        }
 	    
 	    return indexMap.get(index);
 	}

@@ -156,7 +156,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @return
 	 */
 	public static long pastDays(Date date) {
-		long t = new Date().getTime() - date.getTime();
+		long t = System.currentTimeMillis() - date.getTime();
 		return t / (24 * 60 * 60 * 1000);
 	}
 
@@ -167,7 +167,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @return
 	 */
 	public static long pastHour(Date date) {
-		long t = new Date().getTime() - date.getTime();
+		long t = System.currentTimeMillis() - date.getTime();
 		return t / (60 * 60 * 1000);
 	}
 
@@ -178,7 +178,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @return
 	 */
 	public static long pastMinutes(Date date) {
-		long t = new Date().getTime() - date.getTime();
+		long t = System.currentTimeMillis() - date.getTime();
 		return t / (60 * 1000);
 	}
 
@@ -232,8 +232,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			long time1 = cal.getTimeInMillis();
 			cal.setTime(bdate);
 			long time2 = cal.getTimeInMillis();
-			long between_days = (time2 - time1) / (1000 * 3600 * 24);
-			return Integer.parseInt(String.valueOf(between_days));
+			long betweenDays = (time2 - time1) / (1000 * 3600 * 24);
+			return Integer.parseInt(String.valueOf(betweenDays));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -251,8 +251,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			long time1 = cal.getTimeInMillis();
 			cal.setTime(sdf.parse(bdate));
 			long time2 = cal.getTimeInMillis();
-			long between_days = (time2 - time1) / (1000 * 3600 * 24);
-			return Integer.parseInt(String.valueOf(between_days));
+			long betweenDays = (time2 - time1) / (1000 * 3600 * 24);
+			return Integer.parseInt(String.valueOf(betweenDays));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -327,7 +327,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @return 系统当前的时间戳
 	 */
 	public static Timestamp getTimestamp() {
-		return new Timestamp(new Date().getTime());
+		return new Timestamp(System.currentTimeMillis());
 	}
 
 	/**
@@ -346,7 +346,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @return 系统时间的毫秒数
 	 */
 	public static long getMillis() {
-		return new Date().getTime();
+		return System.currentTimeMillis();
 	}
 
 	/**
@@ -526,7 +526,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		long day = hour * 24;
 		long month = day * 30;
 		long year = month * 12;
-		long diffValue = new Date().getTime() - date.getTime();
+		long diffValue = System.currentTimeMillis() - date.getTime();
 		if (diffValue < 0) {
 			return null;
 		}
@@ -567,8 +567,9 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	public static String getAge(String date) {
 		String[] data = date.split("-");
 
-		if (data.length < 3)
+		if (data.length < 3) {
 			return "";
+		}
 
 		Calendar birthday = new GregorianCalendar(Integer.valueOf(data[0]), Integer.valueOf(data[1]),
 				Integer.valueOf(data[2]));
