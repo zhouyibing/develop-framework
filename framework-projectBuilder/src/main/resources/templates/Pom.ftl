@@ -7,6 +7,11 @@
 	<packaging>jar</packaging>
 	<version>${object.projectVersion!1.0-SNAPSHOT}</version>
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.3.RELEASE</version>
+	</parent>
 	<properties>
 		<develop-framework-version>1.0-SNAPSHOT</develop-framework-version>
 		<maven-plugin-version>2.5</maven-plugin-version>
@@ -37,6 +42,12 @@
 		<dependency>
 			<groupId>com.yipeng.develop.framework</groupId>
 			<artifactId>framework-common</artifactId>
+		</dependency>
+		<!-- 引入spring-boot-starter-parent后，默认会使用mysl-cononector-java.5.14   这里需要显示配置mysql-connector-java版本-->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>6.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
