@@ -7,7 +7,6 @@
 	<packaging>jar</packaging>
 	<version>${object.projectVersion!1.0-SNAPSHOT}</version>
 	<modelVersion>4.0.0</modelVersion>
-
 	<properties>
 		<develop-framework-version>1.0-SNAPSHOT</develop-framework-version>
 		<maven-plugin-version>2.5</maven-plugin-version>
@@ -113,10 +112,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-					<finalName>${r'${project.name}'}</finalName>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
