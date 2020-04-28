@@ -109,6 +109,15 @@
 					<updateReleaseInfo>true</updateReleaseInfo>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+					<finalName>${r'${project.name}'}</finalName>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
