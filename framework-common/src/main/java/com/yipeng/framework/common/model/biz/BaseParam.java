@@ -1,5 +1,6 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.biz;
 
+import com.yipeng.framework.common.model.db.AccessObject;
 import lombok.Getter;
 import lombok.Setter;
 

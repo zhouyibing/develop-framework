@@ -11,7 +11,7 @@ import com.yipeng.framework.common.service.converter.ModelResultConverter;
 import com.yipeng.framework.common.dao.BaseDao;
 import com.yipeng.framework.common.exception.ErrorCode;
 import com.yipeng.framework.common.exception.ExceptionUtil;
-import com.yipeng.framework.common.model.BaseModel;
+import com.yipeng.framework.common.model.db.BaseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

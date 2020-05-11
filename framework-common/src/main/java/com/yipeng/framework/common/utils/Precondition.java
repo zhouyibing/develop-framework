@@ -104,6 +104,15 @@ public class Precondition {
     }
 
     public static String checkNumber(String reference, String errorMessage) {
+        boolean flag = checkNumber(reference);
+        if (flag) {
+            return reference;
+        } else {
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    public static boolean checkNumber(CharSequence reference) {
         Boolean flag = true;
         if (StringUtils.isNotBlank(reference)) {
             int i = reference.length();
@@ -122,11 +131,6 @@ public class Precondition {
         } else {
             flag = false;
         }
-
-        if (flag) {
-            return reference;
-        } else {
-            throw new RuntimeException(errorMessage);
-        }
+        return flag;
     }
 }

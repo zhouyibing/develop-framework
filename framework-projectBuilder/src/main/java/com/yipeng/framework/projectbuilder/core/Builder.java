@@ -58,9 +58,14 @@ public class Builder {
             }
         }
         //build spring-boot bootstrap
-        generator(projectMeta, projectMeta.getRootClassPath(),projectMeta.getApplicationName()+"Application.java", "Bootstrap.ftl");
+        if (!StringUtils.isEmpty(projectMeta.getApplicationName())) {
+            generator(projectMeta, projectMeta.getRootClassPath(), projectMeta.getApplicationName() + "Application.java", "Bootstrap.ftl");
+        }
         //build pom
-        generator(projectMeta, projectMeta.getRootPath(),"pom.xml", "Pom.ftl");
+        if( !projectMeta.isNoPom()) {
+            generator(projectMeta, projectMeta.getRootPath(), "pom.xml", "Pom.ftl");
+
+        }
         //copy readme
         generator(projectMeta, projectMeta.getRootPath(),"README.md", "README.md");
         //build properties
@@ -70,8 +75,13 @@ public class Builder {
         dataMap.put("project", projectMeta);
         dataMap.put("datasource", dataSourcInfo);
         dataMap.put("base", baseInfo);
-        generator(dataMap, projectMeta.getRootClassPath()+File.separator+"constant",projectMeta.getApplicationName()+"ErrorCode.java", "ErrorCode.ftl");
-        generator(dataMap, projectMeta.getRootPath()+File.separator+"src"+File.separator+"main"+File.separator+"resources","application.yml", "Properties.ftl");
+        if (!StringUtils.isEmpty(projectMeta.getApplicationName())) {
+            generator(dataMap, projectMeta.getRootClassPath() + File.separator + "constant", projectMeta.getApplicationName() + "ErrorCode.java", "ErrorCode.ftl");
+        }
+
+        if (!projectMeta.isNoProperty()) {
+            generator(dataMap, projectMeta.getRootPath() + File.separator + "src" + File.separator + "main" + File.separator + "resources", "application.yml", "Properties.ftl");
+        }
     }
 
     private static ProjectMeta getProjectMeta() {
@@ -81,6 +91,8 @@ public class Builder {
         String projectGroup = BuildProperties.getString("builder.projectGroup");
         String projectVersion = BuildProperties.getString("builder.projectVersion");
         String applicationName = BuildProperties.getString("builder.applicationName");
+        String noPom = BuildProperties.getString("builder.noPom");
+        String noProperty = BuildProperties.getString("builder.noProperty");
 
         if (StringUtils.isEmpty(baseDir)) {
             throw new NullPointerException("builder.baseDir can not be null");
@@ -97,9 +109,6 @@ public class Builder {
         if (StringUtils.isEmpty(projectVersion)) {
             throw new NullPointerException("builder.projectVersion can not be null");
         }
-        if (StringUtils.isEmpty(applicationName)) {
-            throw new NullPointerException("builder.applicationName can not be null");
-        }
         ProjectMeta projectMeta = new ProjectMeta();
         projectMeta.setProjectArtifact(projectArtifact);
         projectMeta.setBaseDir(baseDir);
@@ -107,9 +116,13 @@ public class Builder {
         projectMeta.setProjectGroup(projectGroup);
         projectMeta.setProjectVersion(projectVersion);
         //第一位大写
-        projectMeta.setApplicationName(applicationName.substring(0,1).toUpperCase().concat(applicationName.substring(1)));
+        if(!StringUtils.isEmpty(applicationName)) {
+            projectMeta.setApplicationName(applicationName.substring(0, 1).toUpperCase().concat(applicationName.substring(1)));
+        }
         projectMeta.setRootPath(projectRoot(projectMeta.getBaseDir(), projectMeta.getProjectArtifact()));
         projectMeta.setRootClassPath(generateRootClassPath(projectMeta.getRootPath(), projectMeta.getBasePackage()));
+        projectMeta.setNoPom(StringUtils.isEmpty(noPom) ? false : Boolean.valueOf(noPom));
+        projectMeta.setNoProperty(StringUtils.isEmpty(noProperty) ? false : Boolean.valueOf(noProperty));
         return projectMeta;
     }
 

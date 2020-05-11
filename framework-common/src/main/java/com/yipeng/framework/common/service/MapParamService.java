@@ -2,7 +2,7 @@ package com.yipeng.framework.common.service;
 
 import com.yipeng.framework.common.service.converter.ModelResultConverter;
 import com.yipeng.framework.common.dao.BaseDao;
-import com.yipeng.framework.common.model.BaseModel;
+import com.yipeng.framework.common.model.db.BaseModel;
 
 import java.util.Map;
 

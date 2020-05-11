@@ -1,10 +1,7 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.db;
 
 import com.yipeng.framework.common.constants.BooleanEnum;
-import com.yipeng.framework.common.constants.Direction;
-import com.yipeng.framework.common.constants.annotation.ConvertExclude;
-import com.yipeng.framework.common.constants.annotation.FieldMapping;
-import com.yipeng.framework.common.service.converter.BooleanIntegerConverter;
+import com.yipeng.framework.common.model.db.AccessObject;
 import lombok.Data;
 
 import javax.persistence.Column;

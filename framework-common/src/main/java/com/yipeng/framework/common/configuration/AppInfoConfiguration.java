@@ -1,6 +1,6 @@
 package com.yipeng.framework.common.configuration;
 
-import com.yipeng.framework.common.model.AppInfo;
+import com.yipeng.framework.common.model.biz.AppInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

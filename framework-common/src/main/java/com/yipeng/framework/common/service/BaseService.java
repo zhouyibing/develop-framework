@@ -3,10 +3,10 @@ package com.yipeng.framework.common.service;
 import cn.hutool.db.sql.Direction;
 import com.github.pagehelper.PageInfo;
 import com.yipeng.framework.common.exception.ExceptionUtil;
-import com.yipeng.framework.common.model.AccessObject;
+import com.yipeng.framework.common.model.db.AccessObject;
 import com.yipeng.framework.common.service.converter.ModelResultConverter;
 import com.yipeng.framework.common.dao.BaseDao;
-import com.yipeng.framework.common.model.BaseModel;
+import com.yipeng.framework.common.model.db.BaseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 

@@ -2,8 +2,6 @@ package com.yipeng.framework.common.dao;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import cn.hutool.core.util.ReflectUtil;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
 import com.google.common.collect.Lists;
@@ -11,17 +9,15 @@ import com.google.common.collect.Maps;
 import com.yipeng.framework.common.constants.BooleanEnum;
 import com.yipeng.framework.common.constants.Constants;
 import com.yipeng.framework.common.mapper.BaseMapper;
-import com.yipeng.framework.common.model.BaseModel;
+import com.yipeng.framework.common.model.db.BaseModel;
 import com.yipeng.framework.common.utils.LangUtils;
 import com.yipeng.framework.common.utils.ModelUtil;
 import lombok.Getter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 

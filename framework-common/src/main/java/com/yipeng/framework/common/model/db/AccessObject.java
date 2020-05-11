@@ -1,4 +1,4 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

@@ -1,6 +1,5 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.biz;
 
-import com.yipeng.framework.common.constants.Priority;
 import lombok.Getter;
 
 import java.util.Objects;

@@ -15,4 +15,6 @@ public class ProjectMeta {
     private String rootClassPath;
     private String projectVersion;
     private String applicationName;
+    private boolean noPom = false;
+    private boolean noProperty = false;
 }

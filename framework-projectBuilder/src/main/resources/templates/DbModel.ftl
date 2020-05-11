@@ -1,7 +1,7 @@
 package ${object.packageStr}.model.db;
 import lombok.Data;
 import java.io.Serializable;
-import com.yipeng.framework.common.model.BaseModel;
+import com.yipeng.framework.common.model.db.BaseModel;
 import javax.persistence.*;
 <#if (object.importList)??>
 	<#list object.importList as item>

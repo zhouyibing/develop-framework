@@ -1,4 +1,4 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.biz;
 
 import com.yipeng.framework.common.utils.Precondition;
 import lombok.Getter;

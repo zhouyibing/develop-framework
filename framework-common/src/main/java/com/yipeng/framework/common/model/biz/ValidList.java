@@ -1,4 +1,4 @@
-package com.yipeng.framework.common.model;
+package com.yipeng.framework.common.model.biz;
 
 import javax.validation.Valid;
 import java.util.*;

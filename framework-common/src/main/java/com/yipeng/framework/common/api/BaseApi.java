@@ -1,8 +1,8 @@
 package com.yipeng.framework.common.api;
 
 import com.github.pagehelper.PageInfo;
-import com.yipeng.framework.common.model.BaseParam;
-import com.yipeng.framework.common.model.ValidList;
+import com.yipeng.framework.common.model.biz.BaseParam;
+import com.yipeng.framework.common.model.biz.ValidList;
 import com.yipeng.framework.common.param.PageParam;
 import com.yipeng.framework.common.result.Result;
 import java.util.List;

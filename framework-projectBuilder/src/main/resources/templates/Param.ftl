@@ -1,5 +1,5 @@
 package ${object.packageStr}.param;
-import com.yipeng.framework.common.model.BaseParam;
+import com.yipeng.framework.common.model.biz.BaseParam;
 import io.swagger.annotations.ApiModelProperty;
 import com.yipeng.framework.common.constants.Direction;
 import com.yipeng.framework.common.constants.annotation.FieldMapping;
