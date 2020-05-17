@@ -20,7 +20,7 @@ dev-framework:
   ###classPathUrlPrefix:指定类路径(可包名)下的url前缀（可多个,多个时只会选择你第一个匹配到的路径，所以把最准确的路径写到前面） 类路径支持ant matcher规则###
   api:
     ignorePaths: ''
-    classPathUrlPrefix: '${project.basePackage}.controller.**@/api'
+    classPathUrlPrefix: '${project.basePackage}.controller.**@${project.applicationName}/api'
 
 ###日志配置###
 logging:
