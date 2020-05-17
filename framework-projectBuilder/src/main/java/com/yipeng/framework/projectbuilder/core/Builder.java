@@ -205,6 +205,7 @@ public class Builder {
         baseInfo.put("appInfoUrl",BuildProperties.getString("builder.base.appInfoUrl"));
         baseInfo.put("appPingUrl",BuildProperties.getString("builder.base.appPingUrl"));
         baseInfo.put("appDisconnectUrl",BuildProperties.getString("builder.base.appDisconnectUrl"));
+        baseInfo.put("apiPrefix",BuildProperties.getString("builder.base.apiPrefix"));
         return baseInfo;
     }
 
