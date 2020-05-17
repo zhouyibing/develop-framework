@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>com.yipeng.develop.framework</groupId>
-            <artifactId>framework-common</artifactId>
+            <artifactId>framework-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

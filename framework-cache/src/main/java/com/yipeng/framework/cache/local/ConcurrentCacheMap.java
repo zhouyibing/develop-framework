@@ -15,7 +15,7 @@
  */
 package com.yipeng.framework.cache.local;
 import com.yipeng.framework.cache.CacheMap;
-import com.yipeng.framework.common.utils.DateUtils;
+import com.yipeng.framework.core.utils.DateUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

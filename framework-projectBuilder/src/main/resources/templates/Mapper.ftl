@@ -1,6 +1,6 @@
 package ${object.packageStr}.mapper;
 import ${object.packageStr}.model.db.${object.name}Model;
-import com.yipeng.framework.common.mapper.BaseMapper;
+import com.yipeng.framework.core.mapper.BaseMapper;
 
 /**
 * @author ${base.authorName}

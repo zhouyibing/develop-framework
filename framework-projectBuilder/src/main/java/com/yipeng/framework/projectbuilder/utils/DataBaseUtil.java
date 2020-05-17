@@ -18,7 +18,7 @@ public class DataBaseUtil {
 	}
 	/**
 	 * 获取连接
-	 * @param driverClassName
+	 * @param driverClassNameprefixDiscard
 	 * @param url
 	 * @param username
 	 * @param password

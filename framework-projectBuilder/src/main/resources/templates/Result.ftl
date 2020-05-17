@@ -1,8 +1,9 @@
 package ${object.packageStr}.result;
-import com.yipeng.framework.common.constants.Direction;
-import com.yipeng.framework.common.constants.annotation.FieldMapping;
+import com.yipeng.framework.core.constants.Direction;
+import com.yipeng.framework.core.constants.annotation.FieldMapping;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.yipeng.framework.common.service.converter.*;
+import com.yipeng.framework.core.service.converter.*;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ import lombok.Data;
 * email:${base.authorEmail}
 * AUTO-GENERATE BY PROJECT-BUILDER
 **/
+@ApiModel("${object.comment}结果")
 @Data
 public class ${object.name}Result {
 	<#if (object.fields)??>

@@ -1,7 +1,7 @@
 package ${object.packageStr}.dao;
 import ${object.packageStr}.mapper.${object.name}Mapper;
 import ${object.packageStr}.model.db.${object.name}Model;
-import com.yipeng.framework.common.dao.BaseDao;
+import com.yipeng.framework.core.dao.BaseDao;
 import org.springframework.stereotype.Repository;
 
 /**

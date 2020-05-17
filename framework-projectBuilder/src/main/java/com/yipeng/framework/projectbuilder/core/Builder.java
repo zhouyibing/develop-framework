@@ -135,14 +135,14 @@ public class Builder {
         noController = new HashSet<>();
         if(!StringUtils.isEmpty(noDaoStr)) {
             Collections.addAll(noDao,noDaoStr.split(","));
-        }
-        if(!StringUtils.isEmpty(noDaoStr)) {
-            Collections.addAll(noService,noServiceStr.split(","));
             noService.addAll(noDao);
         }
-        if(!StringUtils.isEmpty(noDaoStr)) {
-            Collections.addAll(noController,noControllerStr.split(","));
+        if(!StringUtils.isEmpty(noServiceStr)) {
+            Collections.addAll(noService,noServiceStr.split(","));
             noController.addAll(noService);
+        }
+        if(!StringUtils.isEmpty(noControllerStr)) {
+            Collections.addAll(noController,noControllerStr.split(","));
         }
     }
 
@@ -180,7 +180,8 @@ public class Builder {
         String testDir = projectRootPath+File.separator+"src"+File.separator+"test";
         String testJavaDir = testDir+File.separator+"java";
         String testResourcesDir = testDir+File.separator+"resources";
-        mkdirs(apiDir,constantDir, paramDir, utilsDir, resourcesDir, testDir, testJavaDir, testResourcesDir);
+        String configurationDir = rootClassPath+File.separator+"configuration";
+        mkdirs(apiDir,configurationDir,constantDir, paramDir, utilsDir, resourcesDir, testDir, testJavaDir, testResourcesDir);
     }
 
     private static Map<String, Object> getDataSourceInfo() {
@@ -200,8 +201,10 @@ public class Builder {
         baseInfo.put("serverPort",BuildProperties.getString("builder.base.serverPort"));
         baseInfo.put("authorName",BuildProperties.getString("builder.base.authorName"));
         baseInfo.put("authorEmail",BuildProperties.getString("builder.base.authorEmail"));
-        baseInfo.put("systemId",BuildProperties.getString("builder.base.systemId"));
-        baseInfo.put("serviceId",BuildProperties.getString("builder.base.serviceId"));
+        baseInfo.put("appId",BuildProperties.getString("builder.base.appId"));
+        baseInfo.put("appInfoUrl",BuildProperties.getString("builder.base.appInfoUrl"));
+        baseInfo.put("appPingUrl",BuildProperties.getString("builder.base.appPingUrl"));
+        baseInfo.put("appDisconnectUrl",BuildProperties.getString("builder.base.appDisconnectUrl"));
         return baseInfo;
     }
 
@@ -345,7 +348,7 @@ public class Builder {
                 fieldMeta.setBigDecimal(true);
                 break;
             case "BIT" :
-                javaType = "Boolean";
+                javaType = "Byte";
                 break;
             case "BOOLEAN" :
                 javaType = "Boolean";

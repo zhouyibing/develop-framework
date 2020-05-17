@@ -264,7 +264,7 @@
     </distributionManagement> -->
 
     <modules>
-        <module>framework-common</module>
+        <module>framework-core</module>
         <module>framework-job</module>
         <module>framework-cache</module>
         <module>framework-metrics</module>

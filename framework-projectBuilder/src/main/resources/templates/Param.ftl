@@ -1,9 +1,10 @@
 package ${object.packageStr}.param;
-import com.yipeng.framework.common.model.biz.BaseParam;
+import com.yipeng.framework.core.model.biz.BaseParam;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.yipeng.framework.common.constants.Direction;
-import com.yipeng.framework.common.constants.annotation.FieldMapping;
-import com.yipeng.framework.common.service.converter.*;
+import com.yipeng.framework.core.constants.Direction;
+import com.yipeng.framework.core.constants.annotation.FieldMapping;
+import com.yipeng.framework.core.service.converter.*;
 import lombok.Data;
 
 <#if (object.importList)??>
@@ -17,6 +18,7 @@ import ${item};
 * email:${base.authorEmail}
 * AUTO-GENERATE BY PROJECT-BUILDER
 **/
+@ApiModel("${object.comment}参数")
 @Data
 public class ${object.name}Param extends BaseParam {
 

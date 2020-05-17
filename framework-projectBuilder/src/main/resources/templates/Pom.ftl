@@ -22,7 +22,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>com.yipeng.develop.framework</groupId>
-				<artifactId>framework-common</artifactId>
+				<artifactId>framework-core</artifactId>
 				<version>${r'${develop-framework-version}'}</version>
 			</dependency>
 			<dependency>
@@ -41,7 +41,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.yipeng.develop.framework</groupId>
-			<artifactId>framework-common</artifactId>
+			<artifactId>framework-core</artifactId>
 		</dependency>
 		<!-- 引入spring-boot-starter-parent后，默认会使用mysl-cononector-java.5.14   这里需要显示配置mysql-connector-java版本-->
 		<dependency>
