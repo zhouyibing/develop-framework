@@ -11,5 +11,11 @@ public class AppInfo {
     private String serviceName;
     private String systemName;
     private String serviceId;
+    private String manager;
+    private String managerEmail;
+    private String managerMobile;
+    private String candidate;
+    private String candidateEmail;
+    private String candidateMobile;
     private String appId;
 }

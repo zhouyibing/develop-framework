@@ -1,27 +1,23 @@
 package com.yipeng.framework.core.configuration;
 
-import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.yipeng.framework.core.api.BaseApi;
 import com.yipeng.framework.core.dao.BaseDao;
 import com.yipeng.framework.core.mapper.BaseMapper;
+import com.yipeng.framework.core.model.biz.AppInfo;
 import com.yipeng.framework.core.model.db.AccessObject;
 import com.yipeng.framework.core.model.db.BaseModel;
-import com.yipeng.framework.core.result.Result;
+import com.yipeng.framework.core.service.AppService;
 import com.yipeng.framework.core.service.BaseService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -36,6 +32,7 @@ import java.util.*;
 
 @Configuration
 @EnableSwagger2
+@ConditionalOnBean(name = "appService")
 public class SwaggerConfig{
     @Value("${swagger.basePackage:com.yipeng}")
     private String basePackage;
@@ -63,8 +60,17 @@ public class SwaggerConfig{
     private String ignorePaths;
     PathMatcher pathMatcher = new AntPathMatcher();
 
+    @Autowired
+    private AppService appService;
+
     @Bean
     public Docket createRestApi() {
+        AppInfo appInfo = appService.getAppInfo();
+        if(appInfo != null) {
+            contactName = appInfo.getManager() == null ? contactName : appInfo.getManager();
+            contactUrl = appInfo.getManagerMobile() == null ? contactUrl : appInfo.getManagerMobile();
+            contactEmail = appInfo.getManagerEmail() == null ? contactEmail : appInfo.getManagerEmail();
+        }
         ApiInfoBuilder apiInfoBuilder = new ApiInfoBuilder()
                 .title(title)
                 .description(description)

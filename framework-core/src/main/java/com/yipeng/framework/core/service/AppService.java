@@ -7,9 +7,12 @@ import com.yipeng.framework.core.exception.ErrorCode;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.biz.AppInfo;
 import com.yipeng.framework.core.model.biz.ServerInfo;
+import com.yipeng.framework.core.utils.AsyncHelper;
 import com.yipeng.framework.core.utils.IPUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +40,14 @@ public class AppService {
     private AppInfo appInfo;
     private ServerInfo serverInfo;
 
+    @Autowired
+    private AsyncHelper asyncHelper;
+
     public void setServerInfo(ServerInfo serverInfo) {
         this.serverInfo = serverInfo;
     }
 
+    @Nullable
     public AppInfo getAppInfo() {
         if(notConnenctToAppInfoServer) {
             return null;
@@ -48,7 +55,17 @@ public class AppService {
         if(appInfo == null) {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("appId", appId);
-            String result = HttpUtil.get(appInfoUrl, paramMap);
+            String result = null;
+            try {
+                result = HttpUtil.get(appInfoUrl, paramMap);
+            }catch (Exception e) {
+                log.error("", e);
+                //连接异常，后面5s异步重试
+                asyncHelper.asyncDelay("getAppInfo", () -> getAppInfo(), 30000);
+            }
+            if(result == null) {
+                return null;
+            }
             JSONObject jsonObject = JSON.parseObject(result);
             Boolean success = jsonObject.getBoolean("success");
             if(success == null || !success) {
@@ -63,6 +80,12 @@ public class AppService {
                 appInfo.setSystemName(data.getString("systemName"));
                 appInfo.setServiceId(data.getString("serviceId"));
                 appInfo.setServiceName(data.getString("serviceName"));
+                appInfo.setManager(data.getString("manager"));
+                appInfo.setManagerEmail(data.getString("managerEmail"));
+                appInfo.setManagerMobile(data.getString("managerMobile"));
+                appInfo.setCandidate(data.getString("candidate"));
+                appInfo.setCandidateEmail(data.getString("candidateEmail"));
+                appInfo.setCandidateMobile(data.getString("candidateMobile"));
                 log.info("get appInfo:{}", appInfo);
                 this.appInfo = appInfo;
             }

@@ -8,6 +8,8 @@ server:
 
 ###开发框架里的一些配置###
 dev-framework:
+  ###是否允许跨域访问###
+  allowedCrossDomain: true
   ###应用基本信息###
   appInfo:
     appId: '${base.appId}'
