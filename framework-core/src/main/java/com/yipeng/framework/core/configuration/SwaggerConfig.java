@@ -1,10 +1,16 @@
 package com.yipeng.framework.core.configuration;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.yipeng.framework.core.api.BaseApi;
 import com.yipeng.framework.core.dao.BaseDao;
 import com.yipeng.framework.core.mapper.BaseMapper;
 import com.yipeng.framework.core.model.biz.AppInfo;
+import com.yipeng.framework.core.model.biz.ModelPropertyFilter;
 import com.yipeng.framework.core.model.db.AccessObject;
 import com.yipeng.framework.core.model.db.BaseModel;
 import com.yipeng.framework.core.service.AppService;
@@ -16,30 +22,32 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.*;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.Contact;
+import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
+import springfox.documentation.spring.web.json.Json;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger.web.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.jws.WebParam;
 import java.util.*;
 
 @Configuration
 @EnableSwagger2
-@ConditionalOnBean(name = "appService")
-public class SwaggerConfig extends WebMvcConfigurerAdapter {
+@ConditionalOnBean(AppService.class)
+public class SwaggerConfig {
     @Value("${swagger.basePackage:com.yipeng}")
     private String basePackage;
     @Value("${swagger.title:api接口文档}")
@@ -154,29 +162,68 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
         return securityReferences;
     }
 
+    @ControllerAdvice
+    @ConditionalOnBean(ModelPropertyFilter.class)
+    public class SwaggerIntercept implements ResponseBodyAdvice {
 
-    /**
-     * 注册拦截器
-     * @param registry
-     */
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new SwaggerIntercept()).addPathPatterns("**/v2/api-docs");
-    }
+        @Autowired
+        private ModelPropertyFilter modelPropertyFilter;
 
-    public class SwaggerIntercept implements HandlerInterceptor {
+        private String apiDocsPath = "/**/v2/api-docs";
+
         @Override
-        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception{
+        public boolean supports(MethodParameter returnType, Class converterType) {
             return true;
         }
 
         @Override
-        public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+        public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+            if(PathMatcherUtil.match(apiDocsPath, request.getURI().getPath()) && body instanceof Json) {
+                JSONObject docsObj = JSON.parseObject(((Json) body).value(), Feature.DisableCircularReferenceDetect);
+                JSONObject paths = docsObj.getJSONObject("paths");
+                JSONObject definitions = docsObj.getJSONObject("definitions");
+                paths.forEach( (path,v) -> {
+                    //循环paths
+                    ((JSONObject)v).forEach((kk,vv) -> {
+                        JSONArray parameters = ((JSONObject)vv).getJSONArray("parameters");
+                        //根据参数位置，找到对应的过滤配置
+                        for(int i = 0; i < parameters.size(); i++) {
+                            ModelPropertyFilter.FilterParam filterParam = modelPropertyFilter.getFilterParam(path, i);
+                            if(filterParam == null) {continue;}
+                            filterModel(filterParam.getFields(), definitions, parameters.getJSONObject(i));
+                        }
+                    });
+                });
 
+                //移除没有properties的model
+                if(definitions != null) {
+                    List<String> removeKeys = Lists.newArrayList();
+                    for(Map.Entry<String, Object> entry : definitions.entrySet()) {
+                        Object value = entry.getValue();
+                        JSONObject properties = ((JSONObject)value).getJSONObject("properties");
+                        if(properties == null || properties.isEmpty()) {
+                            removeKeys.add(entry.getKey());
+                        }
+                    }
+                    removeKeys.forEach(k -> definitions.remove(k));
+                }
+                return docsObj;
+            }
+            return body;
         }
 
-        @Override
-        public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+        private void filterModel(Set<String> filterFileds, JSONObject definitions, JSONObject param) {
+            JSONObject schema = param.getJSONObject("schema");
+            String ref = schema.getString("$ref");
+            if(StringUtils.isNotBlank(ref)) {
+                String[] modelDef = ref.split("definitions/");
+                if(modelDef.length < 2) {return;}
+                JSONObject model = definitions.getJSONObject(modelDef[1]);
+                JSONObject copyModel = JSONObject.parseObject(model.toJSONString(), Feature.DisableCircularReferenceDetect);
+                JSONObject properties = copyModel.getJSONObject("properties");
+                filterFileds.forEach(filterFiled -> properties.remove(filterFiled));
+                param.put("schema", copyModel);
+            }
         }
     }
 }

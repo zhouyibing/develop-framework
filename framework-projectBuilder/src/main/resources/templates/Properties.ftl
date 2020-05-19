@@ -107,6 +107,12 @@ swagger:
   description: ${project.projectArtifact}服务api
   ###接口版本
   version: 1.1
+  ###控制哪个接口的模型对象里哪些字段不展示在swagger里
+  modelPropertyFilterConfig: '/**/createIfAbsent@0,id;
+                              /**/create@0,id;
+                              /**/delete@0,selective,id;
+                              /**/get@0,selective,id;
+                              /**/logicDelete@0,selective,id'
   ###联系人信息
   contact:
     name: ${base.authorName}

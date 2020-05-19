@@ -3,6 +3,7 @@ package com.yipeng.framework.core.service;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.yipeng.framework.core.constants.Constants;
 import com.yipeng.framework.core.exception.ErrorCode;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.biz.AppInfo;
@@ -11,6 +12,7 @@ import com.yipeng.framework.core.model.biz.ServerInfo;
 import com.yipeng.framework.core.utils.AsyncHelper;
 import com.yipeng.framework.core.utils.IPUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
@@ -51,7 +53,7 @@ public class AppService {
             paramMap.put("appId", appId);
             String result = null;
             try {
-                result = HttpUtil.get(appInfoUrl, paramMap);
+                result = HttpUtil.createGet(appInfoUrl).form(paramMap).execute().body();
             }catch (Exception e) {
                 log.error("", e);
                 //连接异常，后面5s异步重试
@@ -62,7 +64,7 @@ public class AppService {
             }
             JSONObject jsonObject = JSON.parseObject(result);
             Boolean success = jsonObject.getBoolean("success");
-            if(success == null || !success) {
+            if (success == null || !success) {
                 String code = jsonObject.getString("code");
                 String msg = jsonObject.getString("msg");
                 throw ExceptionUtil.doThrow(new ErrorCode(code, msg));
@@ -109,9 +111,9 @@ public class AppService {
             paramMap.put("appId", appId);
             paramMap.put("ip", serverInfo.getIp());
             paramMap.put("port", serverInfo.getPort());
-            String result = HttpUtil.get(url, paramMap);
+            String result = HttpUtil.createGet(url).form(paramMap).execute().body();
             if (log.isDebugEnabled()) {
-                log.debug("handshake [{}], result={}", disconnectUrl, result);
+                log.debug("handshake [{}], result={}", url, result);
             }
         }
     }

@@ -11,6 +11,7 @@ import com.yipeng.framework.core.constants.Constants;
 import com.yipeng.framework.core.exception.ErrorCode;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.biz.*;
+import com.yipeng.framework.core.model.db.AccessObject;
 import com.yipeng.framework.core.param.PageParam;
 import com.yipeng.framework.core.result.Result;
 import com.yipeng.framework.core.service.BaseService;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
