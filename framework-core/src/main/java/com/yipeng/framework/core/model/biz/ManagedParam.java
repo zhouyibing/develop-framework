@@ -9,7 +9,7 @@ import lombok.Data;
  * @author: yibingzhou
  */
 @Data
-public class ManagedParam extends BaseParam{
+public class ManagedParam<T extends Comparable> extends BaseParam <T>{
 
     @ApiModelProperty("创建人id")
     private String creatorId;

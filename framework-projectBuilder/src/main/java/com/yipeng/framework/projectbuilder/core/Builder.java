@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 /**
@@ -257,6 +258,8 @@ public class Builder {
         Set<String> allNotInParamFields = notInParamMap.get(ALL);
         Set<String> notInResultFields = notInResultMap.get(dbModelMeta.getOriginalTableName());
         Set<String> allNotInResultFields = notInResultMap.get(ALL);
+        AtomicBoolean hasCreatorId = new AtomicBoolean(false);
+        AtomicBoolean hasUpdaterId = new AtomicBoolean(false);
        columns.forEach(column -> {
            FieldMeta fieldMeta = new FieldMeta();
            fieldMeta.setOriginalFieldName(column.getColumnName());
@@ -282,7 +285,16 @@ public class Builder {
            }
            toJavaType(dbModelMeta,fieldMeta, column.getColumnType());
            fieldMetas.add(fieldMeta);
+           if(fieldMeta.getFieldName().equals("creatorId")) {
+               hasCreatorId.set(true);
+           }
+           if(fieldMeta.getFieldName().equals("updaterId")) {
+               hasUpdaterId.set(true);
+           }
        });
+        if(hasCreatorId.get() && hasUpdaterId.get()) {
+            dbModelMeta.setHasManagedFields(true);
+        }
        dbModelMeta.setFields(fieldMetas);
     }
 

@@ -1,5 +1,6 @@
 package ${object.packageStr}.param;
 import com.yipeng.framework.core.model.biz.BaseParam;
+import com.yipeng.framework.core.model.biz.ManagedParam;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import com.yipeng.framework.core.constants.Direction;
@@ -20,7 +21,7 @@ import ${item};
 **/
 @ApiModel("${object.comment}参数")
 @Data
-public class ${object.name}Param extends BaseParam {
+public class ${object.name}Param extends <#if object.hasManagedFields>ManagedParam<${object.primaryKeyType}><#else>BaseParam<${object.primaryKeyType}></#if> {
 
 	<#if (object.fields)??>
 		<#list object.fields as item>

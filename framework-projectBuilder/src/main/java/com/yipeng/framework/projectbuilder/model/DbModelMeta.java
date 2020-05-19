@@ -20,4 +20,5 @@ public class DbModelMeta {
     private String comment;
     private List<FieldMeta> fields;
     private Set<String> importList;
+    private boolean hasManagedFields;
 }

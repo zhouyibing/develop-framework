@@ -23,7 +23,7 @@ import java.util.Set;
  */
 @Component
 public class UnregisterBaseRequestMapping implements ApplicationListener<ContextRefreshedEvent> {
-    @Value("${dev-framework.api.ignorePaths:''}")
+    @Value("${dev-framework.api.ignorePaths:}")
     private String ignorePaths;
 
     @Autowired

@@ -149,6 +149,7 @@ public class DataBaseUtil {
 					if(!StringUtils.isEmpty(nullable)) {
 						column.setNullAble(nullable);
 					}
+
 					columnMap.put(columnName, column);
 				}
 				table.setColumns(new ArrayList<>(columnMap.values()));

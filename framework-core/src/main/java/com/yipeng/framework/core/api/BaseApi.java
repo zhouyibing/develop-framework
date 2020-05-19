@@ -29,12 +29,12 @@ public interface BaseApi<P extends BaseParam, R>{
     Result<Integer> saveList(ValidList<P> params);
 
     Result<Integer> delete(P param);
-    Result<Boolean> deleteByPk(P param);
-    Result<Integer> deleteByPkList(List<P> param);
+    <K extends Comparable> Result<Boolean> deleteByPk(K param);
+    <K extends Comparable> Result<Integer> deleteByPkList(List<K> param);
 
     Result<Integer> logicDelete(P param);
-    Result<Boolean> logicDeleteByPk(P param);
-    Result<Integer> logicDeleteByPkList(List<P> param);
+    <K extends Comparable> Result<Boolean> logicDeleteByPk(K param);
+    <K extends Comparable> Result<Integer> logicDeleteByPkList(List<K> param);
 
     Result<Boolean> update(P param);
 
@@ -46,9 +46,9 @@ public interface BaseApi<P extends BaseParam, R>{
      */
     Result<ResultOverview> updateList(ValidList<P> param);
 
-    Result<R> getByPk(P param);
+    <K extends Comparable> Result<R> getByPk(K pk);
 
-    Result<R> getByPkList(List<P> id);
+    <K extends Comparable> Result<R> getByPkList(List<K> pks);
 
     Result<R> get(P param);
 

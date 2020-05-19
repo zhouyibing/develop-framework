@@ -1,8 +1,23 @@
 package com.yipeng.framework.core.configuration;
 
+import com.yipeng.framework.core.thread.MDCTaskExecutor;
+import com.yipeng.framework.core.thread.MDCTaskScheduler;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * 线程池配置
@@ -14,7 +29,7 @@ public class ThreadPoolConfig {
 
     @Bean("singleThreadPool")
     public ThreadPoolTaskExecutor singleThreadPool() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        ThreadPoolTaskExecutor executor = new MDCTaskExecutor();
         //设置核心线程数
         executor.setCorePoolSize(1);
         //设置最大线程数
@@ -29,4 +44,14 @@ public class ThreadPoolConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean
+    public TaskScheduler taskScheduler(){
+        ThreadPoolTaskScheduler taskScheduler = new MDCTaskScheduler();
+        ////定义线程池数量为5 个
+        taskScheduler.setPoolSize(5);
+        return taskScheduler ;
+    }
+
+
 }

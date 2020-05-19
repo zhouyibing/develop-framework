@@ -2,10 +2,12 @@ package com.yipeng.framework.core.web.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ReflectUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.yipeng.framework.core.api.BaseApi;
+import com.yipeng.framework.core.constants.Constants;
 import com.yipeng.framework.core.exception.ErrorCode;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.biz.*;
@@ -17,8 +19,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -32,10 +36,10 @@ import java.util.function.Function;
  * @author: yibingzhou
  */
 public class BaseController<P extends BaseParam, R, S extends BaseService> implements BaseApi<P,R> {
-    private final static String HEADER_TOKEN = "token";
     protected final static String ALL = "*";
 
     @Autowired
+    @JsonIgnore
     protected S service;
 
     private Class resultClass;
@@ -77,10 +81,10 @@ public class BaseController<P extends BaseParam, R, S extends BaseService> imple
      * @return
      */
     public String getAccessToken() {
-        String token = getHeader(HEADER_TOKEN);
+        String token = getHeader(Constants.HEAD_TOKEN);
         if (StringUtils.isEmpty(token)) {
             ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            token = sra.getRequest().getParameter(HEADER_TOKEN);
+            token = sra.getRequest().getParameter(Constants.HEAD_TOKEN);
         }
         return token;
     }
@@ -181,21 +185,19 @@ public class BaseController<P extends BaseParam, R, S extends BaseService> imple
     }
 
     @Override
-    @PostMapping("/deleteByPk")
+    @GetMapping("/deleteByPk")
     @ApiOperation("根据主键删除")
-    public Result<Boolean> deleteByPk(@ApiParam(name = "pk", value = "主键", required = true) @RequestBody P pk) {
-        Comparable pkValue  = getPk(pk);
+    public <K extends Comparable> Result<Boolean> deleteByPk(@ApiParam(name = "pk", value = "主键", required = true) @RequestParam K pk) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, pkValue, (p) -> service.deleteByPk(p));
+        return enhance(methodName, pk, (p) -> service.deleteByPk(p));
     }
 
     @Override
     @PostMapping("/deleteByPkList")
     @ApiOperation("批量根据主键删除")
-    public Result<Integer> deleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<P> pks) {
-        List list = getPks(pks);
+    public <K extends Comparable> Result<Integer> deleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<K> pks) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, list, (p) -> service.deleteByPks(p));
+        return enhance(methodName, pks, (p) -> service.deleteByPks(p));
     }
 
     @Override
@@ -208,21 +210,19 @@ public class BaseController<P extends BaseParam, R, S extends BaseService> imple
     }
 
     @Override
-    @PostMapping("/logicDeleteByPk")
+    @GetMapping("/logicDeleteByPk")
     @ApiOperation("根据主键逻辑删除")
-    public Result<Boolean> logicDeleteByPk(@ApiParam(name = "pk", value = "主键", example = "1", required = true) @RequestBody P pk) {
-        Comparable pkValue  = getPk(pk);
+    public <K extends Comparable> Result<Boolean> logicDeleteByPk(@ApiParam(name = "pk", value = "主键", required = true) @RequestParam K pk) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, pkValue, (p) -> service.logicDeleteByPk(p));
+        return enhance(methodName, pk, (p) -> service.logicDeleteByPk(p));
     }
 
     @Override
     @PostMapping("/logicDeleteByPkList")
     @ApiOperation("批量根据主键逻辑删除")
-    public Result<Integer> logicDeleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<P> pks) {
-        List list = getPks(pks);
+    public <K extends Comparable> Result<Integer> logicDeleteByPkList(@ApiParam(name = "pk", value = "主键列表", required = true) @RequestBody List<K> pks) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, list, (p) -> service.logicDeleteByPks(p));
+        return enhance(methodName, pks, (p) -> service.logicDeleteByPks(p));
     }
 
     @Override
@@ -260,21 +260,19 @@ public class BaseController<P extends BaseParam, R, S extends BaseService> imple
     }
 
     @Override
-    @PostMapping("/getByPk")
+    @GetMapping("/getByPk")
     @ApiOperation("根据主键查询")
-    public Result<R> getByPk(@ApiParam(name = "pk", value = "主键",required = true) @RequestBody P pk) {
-        Comparable pkValue  = getPk(pk);
+    public <K extends Comparable> Result<R> getByPk(@ApiParam(name = "pk", value = "主键",required = true) @RequestParam K pk) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, pkValue, (p) -> service.queryByPk(p, getResultClass()));
+        return enhance(methodName, pk, (p) -> service.queryByPk(p, getResultClass()));
     }
 
     @Override
     @PostMapping("/getByPks")
     @ApiOperation("批量根据主键查询")
-    public Result<R> getByPkList(@ApiParam(name = "pks", value = "主键列表", required = true) @RequestBody List<P> pks) {
-        List list = getPks(pks);
+    public <K extends Comparable> Result<R> getByPkList(@ApiParam(name = "pks", value = "主键列表", required = true) @RequestBody List<K> pks) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        return enhance(methodName, list, (p) -> service.queryByPks(p,getResultClass()));
+        return enhance(methodName, pks, (p) -> service.queryByPks(p,getResultClass()));
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yipeng.framework.core.exception.ErrorCode;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.biz.AppInfo;
+import com.yipeng.framework.core.model.biz.ContextHolder;
 import com.yipeng.framework.core.model.biz.ServerInfo;
 import com.yipeng.framework.core.utils.AsyncHelper;
 import com.yipeng.framework.core.utils.IPUtil;
@@ -37,22 +38,15 @@ public class AppService {
     @Value("${dev-framework.appInfo.notConnenctToAppInfoServer:false}")
     private boolean notConnenctToAppInfoServer;
 
-    private AppInfo appInfo;
-    private ServerInfo serverInfo;
-
     @Autowired
     private AsyncHelper asyncHelper;
-
-    public void setServerInfo(ServerInfo serverInfo) {
-        this.serverInfo = serverInfo;
-    }
 
     @Nullable
     public AppInfo getAppInfo() {
         if(notConnenctToAppInfoServer) {
             return null;
         }
-        if(appInfo == null) {
+        if(ContextHolder.getAppInfo() == null) {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("appId", appId);
             String result = null;
@@ -87,45 +81,37 @@ public class AppService {
                 appInfo.setCandidateEmail(data.getString("candidateEmail"));
                 appInfo.setCandidateMobile(data.getString("candidateMobile"));
                 log.info("get appInfo:{}", appInfo);
-                this.appInfo = appInfo;
+                ContextHolder.setAppInfo(appInfo);
             }
         }
-        return appInfo;
+        return ContextHolder.getAppInfo();
     }
 
-    public ServerInfo getServerInfo() {
-        return serverInfo;
-    }
     /**
      * 启动5s后，每隔30秒ping一下应用管理服务
      */
     @Scheduled(initialDelayString = "${dev-framework.appInfo.pingInitial:5000}", fixedDelayString = "${dev-framework.appInfo.pingInterval:30000}")
     public void ping() {
-        if(notConnenctToAppInfoServer) {
-            return;
-        }
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("appId", appId);
-        paramMap.put("ip", serverInfo.getIp());
-        paramMap.put("port", serverInfo.getPort());
-        String result = HttpUtil.get(pingUrl, paramMap);
-        if(log.isDebugEnabled()) {
-            log.debug("ping [{}], result={}", pingUrl, result);
-        }
+        handshake(pingUrl);
     }
 
     public void disconnect() {
+        handshake(disconnectUrl);
+    }
+
+    private void handshake(String url) {
         if(notConnenctToAppInfoServer) {
             return;
         }
+        ServerInfo serverInfo = ContextHolder.getServerInfo();
         if(serverInfo != null) {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("appId", appId);
             paramMap.put("ip", serverInfo.getIp());
             paramMap.put("port", serverInfo.getPort());
-            String result = HttpUtil.get(disconnectUrl, paramMap);
+            String result = HttpUtil.get(url, paramMap);
             if (log.isDebugEnabled()) {
-                log.debug("disconnected [{}], result={}", disconnectUrl, result);
+                log.debug("handshake [{}], result={}", disconnectUrl, result);
             }
         }
     }

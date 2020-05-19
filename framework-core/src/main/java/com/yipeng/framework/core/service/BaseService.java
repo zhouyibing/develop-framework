@@ -1,6 +1,7 @@
 package com.yipeng.framework.core.service;
 
 import cn.hutool.db.sql.Direction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.pagehelper.PageInfo;
 import com.yipeng.framework.core.exception.ExceptionUtil;
 import com.yipeng.framework.core.model.db.AccessObject;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class BaseService <M extends BaseModel,T extends BaseDao>{
 
     @Autowired
+    @JsonIgnore
     protected T dao;
     protected ModelResultConverter modelResultConverter = new ModelResultConverter();
     private Class<M> modelClass;

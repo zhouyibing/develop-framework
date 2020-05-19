@@ -1,5 +1,6 @@
 package com.yipeng.framework.core.web.listener;
 
+import com.yipeng.framework.core.model.biz.ContextHolder;
 import com.yipeng.framework.core.model.biz.ServerInfo;
 import com.yipeng.framework.core.service.AppService;
 import com.yipeng.framework.core.utils.IPUtil;
@@ -38,7 +39,7 @@ public class StartupListener implements ApplicationListener<ApplicationEvent> {
             serverInfo.setIp(ip);
             serverInfo.setPort(port);
             log.info("server info:{}", serverInfo);
-            appInfoService.setServerInfo(serverInfo);
+            ContextHolder.setServerInfo(serverInfo);
         } else if(event instanceof ContextClosedEvent) {
             appInfoService.disconnect();
         }

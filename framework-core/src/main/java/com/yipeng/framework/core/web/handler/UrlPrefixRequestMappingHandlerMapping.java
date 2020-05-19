@@ -1,5 +1,6 @@
 package com.yipeng.framework.core.web.handler;
 
+import com.yipeng.framework.core.utils.PathMatcherUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,12 +16,10 @@ import java.util.List;
 @Slf4j
 public class UrlPrefixRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
 
-    @Value("${dev-framework.api.classPathUrlPrefix:''}")
+    @Value("${dev-framework.api.classPathUrlPrefix:}")
     private String classPathUrlPrefix;
 
     private List<ClassPathUrlPrefixItem> classPathUrlPrefixItemList = new ArrayList<>();
-
-    PathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     public void afterPropertiesSet() {
@@ -55,7 +54,7 @@ public class UrlPrefixRequestMappingHandlerMapping extends RequestMappingHandler
     }
 
     public boolean isPattern(Class<?> clazz, String definedClassPath) {
-        return clazz != null && pathMatcher.match(definedClassPath, clazz.getName()/*clazz.getName().replaceAll("\\.","/")*/);
+        return clazz != null && PathMatcherUtil.match(definedClassPath, clazz.getName());
     }
 
     public RequestMappingInfo combineRequestMappingInfo(RequestMappingInfo original, String prefix) {

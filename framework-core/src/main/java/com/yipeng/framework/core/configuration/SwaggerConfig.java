@@ -9,6 +9,7 @@ import com.yipeng.framework.core.model.db.AccessObject;
 import com.yipeng.framework.core.model.db.BaseModel;
 import com.yipeng.framework.core.service.AppService;
 import com.yipeng.framework.core.service.BaseService;
+import com.yipeng.framework.core.utils.PathMatcherUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -27,12 +32,14 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Configuration
 @EnableSwagger2
 @ConditionalOnBean(name = "appService")
-public class SwaggerConfig{
+public class SwaggerConfig extends WebMvcConfigurerAdapter {
     @Value("${swagger.basePackage:com.yipeng}")
     private String basePackage;
     @Value("${swagger.title:api接口文档}")
@@ -41,23 +48,22 @@ public class SwaggerConfig{
     private String description;
     @Value("${swagger.version:1.0}")
     private String version;
-    @Value("${swagger.contact.name:''}")
+    @Value("${swagger.contact.name:}")
     private String contactName;
-    @Value("${swagger.contact.url:''}")
+    @Value("${swagger.contact.url:}")
     private String contactUrl;
-    @Value("${swagger.contact.email:''}")
+    @Value("${swagger.contact.email:}")
     private String contactEmail;
-    @Value("${swagger.license:''}")
+    @Value("${swagger.license:}")
     private String license;
-    @Value("${swagger.licenseUrl:''}")
+    @Value("${swagger.licenseUrl:}")
     private String licenseUrl;
-    @Value("${swagger.needTokenPaths:''}")
+    @Value("${swagger.needTokenPaths:}")
     private String tokenPaths;
-    @Value("${swagger.headers:''}")
+    @Value("${swagger.headers:}")
     private String headers;
-    @Value("${dev-framework.api.ignorePaths:''}")
+    @Value("${dev-framework.api.ignorePaths:}")
     private String ignorePaths;
-    PathMatcher pathMatcher = new AntPathMatcher();
 
     @Autowired
     private AppService appService;
@@ -89,14 +95,10 @@ public class SwaggerConfig{
                 .apis((input) -> {
                     if(input.getPatternsCondition() != null && input.getPatternsCondition().getPatterns() != null && StringUtils.isNotBlank(ignorePaths)) {
                         //过滤掉需要忽略的接口
-                        String[] paths = ignorePaths.split(",");
-                        Set<String> patterns = input.getPatternsCondition().getPatterns();
-                        for (String path : paths){
-                            for(String p:patterns) {
-                                if(pathMatcher.match(path,p)){
-                                    return false;
-                                }
-                            }
+                        String[] patterns = ignorePaths.split(",");
+                        Set<String> paths = input.getPatternsCondition().getPatterns();
+                        if(PathMatcherUtil.matchAny(patterns, paths)) {
+                            return false;
                         }
                     }
                     return true;
@@ -129,35 +131,13 @@ public class SwaggerConfig{
                             if (null == needTokenPaths) {
                                 return true;
                             }
-                            for(String p : needTokenPaths) {
-                                if (pathMatcher.match(p,path)) {
-                                    return false;
-                                }
+                            if(PathMatcherUtil.matchAny(needTokenPaths, path)) {
+                                return false;
                             }
                             return true;
                         })
                         .build()
         );
-    }
-
-    @Bean
-    public UiConfiguration uiConfig() {
-        return UiConfigurationBuilder.builder()
-                .deepLinking(true)
-                .displayOperationId(false)
-                // 隐藏UI上的Models模块
-                .defaultModelsExpandDepth(-1)
-                .defaultModelExpandDepth(0)
-                .defaultModelRendering(ModelRendering.EXAMPLE)
-                .displayRequestDuration(false)
-                .docExpansion(DocExpansion.NONE)
-                .filter(false)
-                .maxDisplayedTags(null)
-                .operationsSorter(OperationsSorter.ALPHA)
-                .showExtensions(false)
-                .tagsSorter(TagsSorter.ALPHA)
-                .validatorUrl(null)
-                .build();
     }
 
     List<SecurityReference> defaultAuth(String[] headerParams) {
@@ -172,5 +152,31 @@ public class SwaggerConfig{
             securityReferences.add(new SecurityReference(header, authorizationScopes));
         }
         return securityReferences;
+    }
+
+
+    /**
+     * 注册拦截器
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new SwaggerIntercept()).addPathPatterns("**/v2/api-docs");
+    }
+
+    public class SwaggerIntercept implements HandlerInterceptor {
+        @Override
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception{
+            return true;
+        }
+
+        @Override
+        public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+
+        }
+
+        @Override
+        public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+        }
     }
 }

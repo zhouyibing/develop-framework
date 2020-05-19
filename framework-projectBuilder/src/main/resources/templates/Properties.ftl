@@ -8,18 +8,35 @@ server:
 
 ###开发框架里的一些配置###
 dev-framework:
-  ###是否允许跨域访问###
+  ###是否允许跨域访问，默认false###
   allowedCrossDomain: true
   ###应用基本信息###
   appInfo:
+    ###应用id
     appId: '${base.appId}'
+    ###去应用管理中心获取应用信息的请求地址
     infoUrl: '${base.appInfoUrl}'
+    ###应用管理中心的心跳地址
     pingUrl: '${base.appPingUrl}'
+    ###应用管理中心主动断开连接的地址，应用管理中心在30秒后没有接收到心跳，标记应用已停止运行
     disconnectUrl: '${base.appDisconnectUrl}'
-  ###api接口配置信息 ignorePaths:需要过滤的接口路径，支持ant matcher
-  ###classPathUrlPrefix:指定类路径(可包名)下的url前缀（可多个,多个时只会选择你第一个匹配到的路径，所以把最准确的路径写到前面） 类路径支持ant matcher规则###
+  ###api接口配置信息
   api:
+    ###restful接口调用超时值ms，默认100
+    timeout: 100
+    ###是否开启restful接口日志打印，默认false
+    debug: false
+    ###httpValue，http请求拦截，进行一些日志打印，token验证，权限验证等，后续会加入些流控措施
+    httpValue:
+      ###httpValue拦截地址,默认/**,多个逗号分隔
+      pathPatterns: '${base.apiPrefix}'
+      ###哪些路径需要token验证，默认空，都不需要，多个逗号分隔
+      tokenPathPattern:
+      ###哪些路径需要权限访问验证,默认空，都不需要，多个逗号分隔
+      authPathPattern:
+    ###需要忽略掉的请求路径(忽略后的路径请求会报404，同时接口不会在swagger文档中显示),支持ant matcher，多个逗号分隔
     ignorePaths: ''
+    ###指定类路径(可包名)下的url前缀（可多个,多个时只会选择你第一个匹配到的路径，所以把最准确的路径写到前面） 类路径支持ant matcher规则 多个逗号分隔 @后面接url前缀###
     classPathUrlPrefix: '${project.basePackage}.controller.**@${base.apiPrefix}'
 
 ###日志配置###
@@ -82,12 +99,19 @@ pagehelper:
 
 ###swagger配置###
 swagger:
+  ###基本包扫描路径
   basePackage: ${project.basePackage}
+  ###接口文档title
   title: ${project.projectArtifact}服务api
+  ###接口文档描述
   description: ${project.projectArtifact}服务api
+  ###接口版本
   version: 1.1
+  ###联系人信息
   contact:
     name: ${base.authorName}
     email: ${base.authorEmail!''}
+  ###需要设置的请求头名称，多个逗号分隔
   headers: 'token'
+  ###哪些接口需要使用token header，多个逗号分隔
   needTokenPaths:

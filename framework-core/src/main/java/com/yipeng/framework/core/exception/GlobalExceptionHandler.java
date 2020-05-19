@@ -1,8 +1,11 @@
 package com.yipeng.framework.core.exception;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.yipeng.framework.core.constants.Constants;
+import com.yipeng.framework.core.model.biz.ContextHolder;
 import com.yipeng.framework.core.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,8 +20,9 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public class GlobalExceptionHandler {
 	@ResponseBody
 	@ExceptionHandler
-	public Result<?> processException(Exception e) {
+	public Result<?> processException(Throwable e) {
 		log.error("unknown exception！", e);
+		clearContext();
 		return Result.fail(ErrorCode.SERVER_INTERNAL_ERROR.errorParams(new Object[]{e.getMessage()}));
 	}
 
@@ -26,6 +30,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler
 	public Result<?> processException(DataAccessException e) {
 		log.error("db exception！", e);
+		clearContext();
 		if(e instanceof DuplicateKeyException) {
 			return Result.fail(ErrorCode.DUPLICATE_KEY.errorParams(new Object[]{e.getCause().getMessage()}));
 		} else {
@@ -39,6 +44,7 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = e.getErrorCode();
 		Result<?> response = Result.fail(errorCode);
 		log.error("business exception！(" + errorCode.getCode()+")" , e);
+		clearContext();
 		return response;
 	}
 
@@ -48,6 +54,7 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = e.getErrorCode();
 		Result<?> response = Result.fail(errorCode);
 		log.error("tech exception！(" + errorCode.getCode()+")" , e);
+		clearContext();
 		return response;
 	}
 
@@ -67,6 +74,12 @@ public class GlobalExceptionHandler {
 		}
 		Result<?> response = Result.fail(errorCode);
 		log.error("valid exception！(" + errorCode.getCode()+")" , e);
+		clearContext();
 		return response;
+	}
+
+	public void clearContext() {
+		ContextHolder.removeCallContext();
+		MDC.remove(Constants.HEAD_TRACEID);
 	}
 }

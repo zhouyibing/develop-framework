@@ -2,6 +2,7 @@ package com.yipeng.framework.core.dao;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
 import com.google.common.collect.Lists;
@@ -30,6 +31,7 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
 
     @Autowired
     @Getter
+    @JsonIgnore
     protected M baseMapper;
 
     public T queryByPk(Object pk) {

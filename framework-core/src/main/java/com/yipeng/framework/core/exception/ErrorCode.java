@@ -35,6 +35,8 @@ public class ErrorCode {
     public final static ErrorCode BIZ_ERROR = new ErrorCode("0001", "业务异常");
     public final static ErrorCode QUERY_PARAMS_IS_NULL = new ErrorCode("0003", "查询参数为空");
     public final static ErrorCode RECORD_EXISTED = new ErrorCode("0005", "记录已存在");
+    public final static ErrorCode TOKEN_EMPTY = new ErrorCode("0007", "token为空");
+    public final static ErrorCode ACCESS_FORBIDDEN = new ErrorCode("0009", "禁止访问");
 
     /** 错误代码*/
     @Getter

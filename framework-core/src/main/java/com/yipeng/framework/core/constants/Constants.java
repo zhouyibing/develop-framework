@@ -20,4 +20,12 @@ public class Constants {
 
     public final static String SELECTIVE = "selective";
 
+    /** head of token*/
+    public final static String HEAD_TOKEN = "token";
+
+    /** head of traceId*/
+    public final static String HEAD_TRACEID = "traceId";
+
+    /** head of appd*/
+    public final static String HEAD_APPID = "appId";
 }

@@ -1,3 +1,4 @@
+/*
 package com.yipeng.framework.core.configuration;
 
 import org.springframework.boot.web.server.ErrorPage;
@@ -7,9 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 
+*/
 /**
  * @author: yibingzhou
- */
+ *//*
+
 @Configuration
 public class ErrorPageConfiguration {
 
@@ -29,3 +32,4 @@ public class ErrorPageConfiguration {
         }
     }
 }
+*/

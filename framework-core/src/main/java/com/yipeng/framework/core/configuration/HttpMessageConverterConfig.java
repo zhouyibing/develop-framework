@@ -1,3 +1,4 @@
+/*
 package com.yipeng.framework.core.configuration;
 
 import com.alibaba.fastjson.serializer.SerializeConfig;
@@ -12,17 +13,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 
+*/
 /**
  * http消息转换器配置
  * @author: yibingzhou
- */
+ *//*
+
 @Configuration
 public class HttpMessageConverterConfig {
 
-    /**
+    */
+/**
      * 在这里我们使用 @Bean注入 fastJsonHttpMessageConvert
      * @return
-     */
+     *//*
+
     @Bean
     public HttpMessageConverters fastJsonHttpMessageConverters() {
         // 1、需要先定义一个 convert 转换消息的对象;
@@ -40,3 +45,4 @@ public class HttpMessageConverterConfig {
         return new HttpMessageConverters(converter);
     }
 }
+*/

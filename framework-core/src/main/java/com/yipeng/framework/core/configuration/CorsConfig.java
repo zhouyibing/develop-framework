@@ -1,3 +1,4 @@
+/*
 package com.yipeng.framework.core.configuration;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,11 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+*/
 /**
  * 跨域访问设置
- */
+ *//*
+
 @Configuration
 @Slf4j
 public class CorsConfig {
@@ -59,4 +62,4 @@ public class CorsConfig {
             }
         };
     }
-}
+}*/
