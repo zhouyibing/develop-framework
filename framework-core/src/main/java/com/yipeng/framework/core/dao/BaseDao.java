@@ -63,6 +63,14 @@ public class BaseDao<T extends BaseModel,M extends BaseMapper<T>> {
         return baseMapper.deleteByExample(example);
     }
 
+    public T queryOne(T param) {
+        return baseMapper.selectOne(param);
+    }
+
+    public List<T> queryList(T param) {
+        return baseMapper.select(param);
+    }
+
     public PageInfo<T> queryPage(T param, Integer pageNum, Integer pageSize) {
         pageNum = (pageNum == null || pageNum.intValue() < 0) ? START_PAGE_NUM : pageNum;
         pageSize = (pageSize == null || pageSize.intValue() < 0) ? DEFAULT_PAGE_SIZE : pageSize;
