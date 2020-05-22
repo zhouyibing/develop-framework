@@ -107,7 +107,7 @@ swagger:
   description: ${project.projectArtifact}服务api
   ###接口版本
   version: 1.1
-  ###控制哪个接口的模型对象里哪些字段不展示在swagger里
+  ###控制哪个接口的模型对象里哪些字段不展示在swagger里,@前为接口路径，@后第一个参数为接口的参数索引，后接需要过滤的字段','分割；如果接口有多个参数需要过滤用@连接
   modelPropertyFilterConfig: '/**/createIfAbsent@0,id;
                               /**/create@0,id;
                               /**/delete@0,selective,id;

@@ -15,6 +15,7 @@ import com.yipeng.framework.core.model.db.BaseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -58,6 +59,7 @@ public class AbstractBaseService <M extends BaseModel,P,T extends BaseDao> imple
 
     @Override
     public <K extends Comparable, R> List<R> queryByPks(List<K> pks, Class<R> resultClass) {
+        if(CollectionUtils.isEmpty(pks)) {return null;}
         Example example = new Example(modelClass);
         example.createCriteria().andIn(specialModelObj.primaryKeyName(), pks);
         return queryByExample(example, resultClass);

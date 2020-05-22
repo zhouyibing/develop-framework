@@ -20,23 +20,27 @@ import java.util.Objects;
  */
 public class ErrorCode {
 
+    public final static String FRAMEWORK_APP_ID = "000000";
     /**技术异常代码，代码结尾为偶数*/
-    public final static ErrorCode SERVER_INTERNAL_ERROR = new ErrorCode("0000", "服务器内部错误:{0}");
-    public final static ErrorCode UNSUPPORTTED_TYPE = new ErrorCode("0002", "不支持的类型");
-    public final static ErrorCode ILLEGAL_ARGUMENT = new ErrorCode("0004", "参数错误");
-    public final static ErrorCode CAN_NOT_NULL = new ErrorCode("0006", "参数不能为空");
-    public final static ErrorCode PARAM_TYPE_NOT_MATCH = new ErrorCode("0008", "参数类型不匹配");
-    public final static ErrorCode OBJECT_INSTANCE_FAILED = new ErrorCode("0010", "对象实例化失败");
-    public final static ErrorCode OBJECT_CONVERT_FAILED = new ErrorCode("0012", "对象转换({0} to {1})失败:{2}");
-    public final static ErrorCode DUPLICATE_KEY = new ErrorCode("0014", "主键冲突:{0}");
-    public final static ErrorCode DATA_ACCESS_EXCEPTION = new ErrorCode("0016", "数据访问异常:{0}");
+    public final static ErrorCode SERVER_INTERNAL_ERROR = new ErrorCode(FRAMEWORK_APP_ID+"0000", "服务器内部错误:{0}");
+    public final static ErrorCode UNSUPPORTTED_TYPE = new ErrorCode(FRAMEWORK_APP_ID+"0002", "不支持的类型");
+    public final static ErrorCode ILLEGAL_ARGUMENT = new ErrorCode(FRAMEWORK_APP_ID+"0004", "参数错误");
+    public final static ErrorCode CAN_NOT_NULL = new ErrorCode(FRAMEWORK_APP_ID+"0006", "参数不能为空");
+    public final static ErrorCode PARAM_TYPE_NOT_MATCH = new ErrorCode(FRAMEWORK_APP_ID+"0008", "参数类型不匹配");
+    public final static ErrorCode OBJECT_INSTANCE_FAILED = new ErrorCode(FRAMEWORK_APP_ID+"0010", "对象实例化失败");
+    public final static ErrorCode OBJECT_CONVERT_FAILED = new ErrorCode(FRAMEWORK_APP_ID+"0012", "对象转换({0} to {1})失败:{2}");
+    public final static ErrorCode DUPLICATE_KEY = new ErrorCode(FRAMEWORK_APP_ID+"0014", "主键冲突:{0}");
+    public final static ErrorCode DATA_ACCESS_EXCEPTION = new ErrorCode(FRAMEWORK_APP_ID+"0016", "数据访问异常:{0}");
 
     /***业务异常代码，代码结尾为奇数*/
-    public final static ErrorCode BIZ_ERROR = new ErrorCode("0001", "业务异常");
-    public final static ErrorCode QUERY_PARAMS_IS_NULL = new ErrorCode("0003", "查询参数为空");
-    public final static ErrorCode RECORD_EXISTED = new ErrorCode("0005", "记录已存在");
-    public final static ErrorCode TOKEN_EMPTY = new ErrorCode("0007", "token为空");
-    public final static ErrorCode ACCESS_FORBIDDEN = new ErrorCode("0009", "禁止访问");
+    public final static ErrorCode BIZ_ERROR = new ErrorCode(FRAMEWORK_APP_ID+"0001", "业务异常");
+    public final static ErrorCode QUERY_PARAMS_IS_NULL = new ErrorCode(FRAMEWORK_APP_ID+"0003", "查询参数为空");
+    public final static ErrorCode RECORD_EXISTED = new ErrorCode(FRAMEWORK_APP_ID+"0005", "记录已存在");
+    public final static ErrorCode TOKEN_EMPTY = new ErrorCode(FRAMEWORK_APP_ID+"0007", "token为空");
+    public final static ErrorCode TOKEN_EXPIRED = new ErrorCode(FRAMEWORK_APP_ID+"0009", "token已过期");
+    public final static ErrorCode TOKEN_PARSE_ERROR = new ErrorCode(FRAMEWORK_APP_ID+"0011", "token解析异常");
+    public final static ErrorCode SIGNATURE_FAILED = new ErrorCode(FRAMEWORK_APP_ID+"0013", "签名失败");
+    public final static ErrorCode ACCESS_FORBIDDEN = new ErrorCode(FRAMEWORK_APP_ID+"0015", "禁止访问");
 
     /** 错误代码*/
     @Getter
@@ -51,11 +55,7 @@ public class ErrorCode {
     private Object[] errorParams;
 
     public ErrorCode(String code) {
-        code = assembleCode(code);
-        if (code.trim().length() != 10) {
-            throw new RuntimeException("错误代码必须为10位的数字");
-        }
-        Precondition.checkNumber(code, "错误代码必须为10位的数字");
+        checkCode(code);
         this.code = code;
     }
 
@@ -86,29 +86,6 @@ public class ErrorCode {
             return msg;
         }
         msg = MessageFormat.format(msg, errorParams);
-       /* for (int i = 0; i < errorParams.length; i++) {
-            int leftIx = msg.indexOf("{");
-            int rightIx = msg.indexOf("}");
-            //参数占位符
-            String placeHolder = null;
-            //默认长度50
-            int maxLen = 50;
-            if(leftIx>0 && rightIx >0) {
-                placeHolder = msg.substring(leftIx,rightIx+1);
-                //提取限定长度
-                int lenStartIx = placeHolder.indexOf("#");
-                if(lenStartIx > 0){
-                    String len = placeHolder.substring(lenStartIx+1, placeHolder.length()-1);
-                    try {
-                        maxLen = Integer.valueOf(len);
-                    } catch (NumberFormatException e){}
-                }
-            }
-            if(placeHolder != null) {
-                String paramStr = String.valueOf(errorParams[i]);
-                msg = msg.replace(placeHolder, paramStr.substring(0, maxLen > paramStr.length() ? paramStr.length() : maxLen));
-            }
-        }*/
         return msg;
     }
 
@@ -124,9 +101,13 @@ public class ErrorCode {
         return code.equals(errorCode.code);
     }
 
-    private String assembleCode(String code) {
-        if(code.length() < 10) {
-            code = ConfigUtils.getProperty("dev-framework.appInfo.appId").concat(code);
+    private String checkCode(String code) {
+        if (code.trim().length() != 10) {
+            throw new RuntimeException("错误代码必须为10位的数字");
+        }
+        Precondition.checkNumber(code, "错误代码必须为10位的数字");
+        if(!code.startsWith(FRAMEWORK_APP_ID) && !code.startsWith(ConfigUtils.getProperty("dev-framework.appInfo.appId"))) {
+            throw new RuntimeException("错误代码必须以应用id开始");
         }
         return code;
     }

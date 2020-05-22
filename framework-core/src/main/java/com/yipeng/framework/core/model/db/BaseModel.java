@@ -17,6 +17,9 @@ import java.util.Date;
 @Data
 public class BaseModel<K extends Comparable> extends AccessObject implements Serializable{
 
+    public static final String LOGIC_DELETE = "logicDelete";
+    public static final String ID = "id";
+
     private static final long serialVersionUID = 2341576501122011554L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +41,6 @@ public class BaseModel<K extends Comparable> extends AccessObject implements Ser
      * @return
      */
     public String primaryKeyName(){
-        return "id";
+        return ID;
     }
 }
