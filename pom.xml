@@ -11,7 +11,7 @@
     <description>技术开发框架</description>
     <properties>
         <lombok-version>1.16.18</lombok-version>
-        <jackson-version>2.9.6</jackson-version>
+        <jackson-version>2.9.10.5</jackson-version>
         <lang3-version>3.7</lang3-version>
         <fastjson-version>1.2.47</fastjson-version>
         <gson-version>2.8.5</gson-version>
