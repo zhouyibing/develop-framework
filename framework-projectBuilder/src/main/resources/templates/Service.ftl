@@ -2,7 +2,7 @@ package ${object.packageStr}.service;
 import ${object.packageStr}.dao.${object.name}Dao;
 import ${object.packageStr}.model.db.${object.name}Model;
 import org.springframework.stereotype.Service;
-import com.yipeng.framework.core.service.BaseService;
+import com.fido.framework.core.service.BaseService;
 
 /**
 * @author ${base.authorName}

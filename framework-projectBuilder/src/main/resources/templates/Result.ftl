@@ -1,9 +1,9 @@
 package ${object.packageStr}.result;
-import com.yipeng.framework.core.constants.Direction;
-import com.yipeng.framework.core.constants.annotation.FieldMapping;
+import com.fido.framework.core.constants.Direction;
+import com.fido.framework.core.constants.annotation.FieldMapping;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.yipeng.framework.core.service.converter.*;
+import com.fido.framework.core.service.converter.*;
 import lombok.Data;
 
 /**

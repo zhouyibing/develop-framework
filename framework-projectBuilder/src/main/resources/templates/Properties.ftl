@@ -43,7 +43,7 @@ dev-framework:
 logging:
   level:
     root: INFO
-    com.yipeng.*: DEBUG
+    com.fido.*: DEBUG
     org.apache.ibatis: DEBUG
     com.github.pagehelper: DEBUG
     com.github.pagehelper.mapper: INFO

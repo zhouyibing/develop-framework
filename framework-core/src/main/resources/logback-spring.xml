@@ -37,7 +37,7 @@
         </encoder>
     </appender>
     ​
-    <logger name="com.yipeng.framework" additivity="false">
+    <logger name="com.fido.framework" additivity="false">
         <level value="DEBUG" />
         <appender-ref ref="console"/>
         <appender-ref ref="flatfile"/>

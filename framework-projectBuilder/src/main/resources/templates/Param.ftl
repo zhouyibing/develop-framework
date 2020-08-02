@@ -1,11 +1,11 @@
 package ${object.packageStr}.param;
-import com.yipeng.framework.core.model.biz.BaseParam;
-import com.yipeng.framework.core.model.biz.ManagedParam;
+import com.fido.framework.core.model.biz.BaseParam;
+import com.fido.framework.core.model.biz.ManagedParam;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.yipeng.framework.core.constants.Direction;
-import com.yipeng.framework.core.constants.annotation.FieldMapping;
-import com.yipeng.framework.core.service.converter.*;
+import com.fido.framework.core.constants.Direction;
+import com.fido.framework.core.constants.annotation.FieldMapping;
+import com.fido.framework.core.service.converter.*;
 import lombok.Data;
 
 <#if (object.importList)??>

@@ -13,7 +13,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 **/
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = {"com.yipeng.framework","${object.basePackage}"})
+@ComponentScan(basePackages = {"com.fido.framework","${object.basePackage}"})
 @MapperScan(basePackages = {"${object.basePackage}.mapper"})
 public class ${object.applicationName}Application {
     public static void main(String[] args) {

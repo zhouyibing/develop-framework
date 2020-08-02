@@ -1,6 +1,6 @@
 package ${project.basePackage}.constant;
 
-import com.yipeng.framework.core.exception.ErrorCode;
+import com.fido.framework.core.exception.ErrorCode;
 
 /**
 * ${project.applicationName} 错误代码定义

@@ -1,4 +1,4 @@
-                                      亿朋研发一室开发规范v1.0
+                                      开发规范v1.0
                                       
 一. 编码规范
     
@@ -14,7 +14,7 @@
    
    3. 变量名，方法名用Camel大小写，首字母小写。如：myVar
    
-   4. 包名全部小写。如：com.yipeng.framework
+   4. 包名全部小写。如：com.fido.framework
    
    5. 常量名全部大写，单词之间以下划线分隔。如:ROLE_VIP
    
@@ -372,9 +372,9 @@
   
   如需便捷实用事务/异步操作，可参考如下帮助类
    
-       com.yipeng.framework.common.utils.AsyncHelper
+       com.fido.framework.common.utils.AsyncHelper
        
-       com.yipeng.framework.common.utils.TransactionalHelper   
+       com.fido.framework.common.utils.TransactionalHelper   
        
        
  code review & 项目评审 时严格按照以上执行！！！！！     
